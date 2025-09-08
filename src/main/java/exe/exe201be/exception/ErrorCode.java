@@ -1,0 +1,29 @@
+package exe.exe201be.exception;
+
+import lombok.Getter;
+
+public enum ErrorCode {
+    VALIDATION_FAILED(400, "Validation Failed"),
+    USER_EXISTS(409, "User already exists"),
+    BLANK(1000, "Fields must not be blank"),
+    FULLNAME_INVALID(1001, "Full name must be at least 2 characters long"),
+    EMAIL_INVALID(1002, "Email should be valid"),
+    PASSWORD_INVALID(1003, "Password must be at least 6 characters long"),
+    PHONE_INVALID(1004, "Phone number must be valid (e.g., +1234567890)"),
+    ;
+    ErrorCode(int code, String message) {
+        this.code = code;
+        this.message = message;
+    }
+
+    private int code;
+    private String message;
+
+    public int getCode() {
+        return code;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+}

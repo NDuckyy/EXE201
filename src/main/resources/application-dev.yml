@@ -1,0 +1,6 @@
+spring:
+  data:
+    mongodb:
+      uri: ${MONGO_URI}
+      database: EXE201
+      auto-index-creation: true
