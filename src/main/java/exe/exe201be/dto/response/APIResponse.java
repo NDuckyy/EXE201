@@ -1,5 +1,6 @@
 package exe.exe201be.dto.response;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
@@ -23,6 +24,7 @@ public class APIResponse<T> {
     private T data;
 
     @Schema(description = "Timestamp when the response was created", example = "2023-10-05T14:48:00.000+00:00")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yy HH:mm:ss", timezone = "UTC")
     private Date createdAt = new Date();
 
 }
