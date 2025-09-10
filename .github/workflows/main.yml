@@ -50,12 +50,12 @@ jobs:
       - name: Copy artifact to server
         uses: appleboy/scp-action@v0.1.4
         with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
-          key: ${{ secrets.SSH_KEY }}                 # private key OpenSSH
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_KEY }}                 # private key OpenSSH
           passphrase: ${{ secrets.SSH_PASSPHRASE }}   # <-- SỬA: thêm passphrase
           port: 22
-          fingerprint: ${{ secrets.SSH_FINGERPRINT }} # khuyến nghị
+          fingerprint: ${{ secrets.VPS_FINGERPRINT }} # khuyến nghị
           source: "build/app.tar.gz"
           target: "${{ secrets.TARGET_DIR }}"         # ví dụ: /var/www/founderHub-exe201-backend
           overwrite: true
@@ -66,12 +66,12 @@ jobs:
       - name: Remote deploy
         uses: appleboy/ssh-action@v1.0.0
         with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
-          key: ${{ secrets.SSH_KEY }}
+          host: ${{ secrets.VPSHOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_KEY }}
           passphrase: ${{ secrets.SSH_PASSPHRASE }}   # <-- SỬA: thêm passphrase
           port: 22
-          fingerprint: ${{ secrets.SSH_FINGERPRINT }}
+          fingerprint: ${{ secrets.VPS_FINGERPRINT }}
           script: |
             set -e
             APP_DIR="${{ secrets.TARGET_DIR }}"          # /var/www/founderHub-exe201-backend
