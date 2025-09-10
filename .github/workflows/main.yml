@@ -2,7 +2,7 @@ name: EXE201 Backend – Build & Deploy
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "master" ]
   workflow_dispatch:
 
 jobs:
