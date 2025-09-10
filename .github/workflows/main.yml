@@ -3,7 +3,7 @@ name: CI/CD Deploy to VPS using Docker (founderHub-exe201-backend)
 on:
   push:
     branches:
-      - main
+      - master
 
 jobs:
   deploy:
