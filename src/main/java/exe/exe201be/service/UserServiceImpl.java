@@ -20,19 +20,18 @@ public class UserServiceImpl implements UserService{
         return userRepository.findAll();
     }
 
-    @Override
-    public void createUser(CreateUserRequest user) {
-        User existUser = userRepository.findByFullName(user.getFullName());
-        if(existUser != null){
-            throw new AppException(ErrorCode.USER_EXISTS);
-        }
-        User userEntity = new User();
-        userEntity.setFullName(user.getFullName());
-        userEntity.setPassword(user.getPassword());
-        userEntity.setEmail(user.getEmail());
-        userEntity.setPhone(user.getPhone());
-        userEntity.setRole(1);
-        userEntity.setStatus(true);
-        userRepository.save(userEntity);
-    }
+//    @Override
+//    public void createUser(CreateUserRequest user) {
+//        User existUser = userRepository.findByFullName(user.getFullName());
+//        if(existUser != null){
+//            throw new AppException(ErrorCode.USER_EXISTS);
+//        }
+//        User userEntity = new User();
+//        userEntity.setFullName(user.getFullName());
+//        userEntity.setPassword(user.getPassword());
+//        userEntity.setEmail(user.getEmail());
+//        userEntity.setPhone(user.getPhone());
+//        userEntity.setStatus(true);
+//        userRepository.save(userEntity);
+//    }
 }

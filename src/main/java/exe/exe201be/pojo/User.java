@@ -1,13 +1,14 @@
 package exe.exe201be.pojo;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
 import lombok.*;
+import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
+
+import java.time.Instant;
 
 @Document(collection = "users")
 @NoArgsConstructor
@@ -21,28 +22,40 @@ public class User {
     @Schema(description = "Unique identifier of the user", example = "507f1f77bcf86cd799439011")
     private String id;
 
-    @Indexed
     @Schema(description = "Email of the user", example = "john_doe@gmail.com")
     private String email;
 
-    @Indexed
     @Schema(description = "Password of the user", example = "securePassword123")
     private String password;
 
-    @Indexed
     @Schema(description = "Full name of the user", example = "John Doe")
     private String fullName;
 
-    @Indexed
     @Schema(description = "Phone number of the user", example = "+1234567890")
     private String phone;
 
-    @Indexed
+    @Schema(description = "Avatar URL of the user", example = "http://example.com/avatar.jpg")
+    private String avatar_url;
+
     @Schema(description = "Status of the user", example = "true")
     private boolean status;
 
-    @Indexed
-    @Schema(description = "Role of the user (0: user, 1: admin)", example = "0")
-    private Integer role; // 0: user, 1: admin
+    @CreatedDate
+    @Schema(description = "Timestamp when the user was created")
+    private Instant createdAt;
+
+    @LastModifiedDate
+    @Schema(description = "Timestamp when the user was last updated")
+    private Instant updatedAt;
+
+    @Schema(description = "Gender of the user", example = "MALE")
+    private Gender gender;
+
+    @Schema(description = "Address of the user", example = "123 Main St, City, Country")
+    private String address;
+
+    @Schema(description = "Image URL of the user", example = "http://example.com/image.jpg")
+    private String image;
+
 
 }

@@ -7,5 +7,5 @@ import java.util.List;
 
 public interface UserService {
     List<User> getAllUser ();
-    void createUser (CreateUserRequest user);
+//    void createUser (CreateUserRequest user);
 }

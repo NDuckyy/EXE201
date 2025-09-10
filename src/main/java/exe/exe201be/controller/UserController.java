@@ -40,22 +40,22 @@ public class UserController {
         return response;
     }
 
-    @PostMapping("/create")
-    @Operation(summary = "Create User", description = "Creates a new user")
-    @ApiResponses(value = {
-            @ApiResponse(
-                    responseCode = "200",
-                    description = "User created successfully",
-                    content = @Content(
-                            mediaType = "application/json",
-                            schema = @Schema(implementation = APIResponse.class)
-                    )
-            )
-    })
-    public APIResponse<?> createUser(@RequestBody @Valid CreateUserRequest request) {
-        APIResponse<?> response = new APIResponse<>();
-        userService.createUser(request);
-        response.setMessage("Success");
-        return response;
-    }
+//    @PostMapping("/create")
+//    @Operation(summary = "Create User", description = "Creates a new user")
+//    @ApiResponses(value = {
+//            @ApiResponse(
+//                    responseCode = "200",
+//                    description = "User created successfully",
+//                    content = @Content(
+//                            mediaType = "application/json",
+//                            schema = @Schema(implementation = APIResponse.class)
+//                    )
+//            )
+//    })
+//    public APIResponse<?> createUser(@RequestBody @Valid CreateUserRequest request) {
+//        APIResponse<?> response = new APIResponse<>();
+//        userService.createUser(request);
+//        response.setMessage("Success");
+//        return response;
+//    }
 }
