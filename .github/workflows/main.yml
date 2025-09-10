@@ -1,0 +1,57 @@
+name: CI/CD Deploy to VPS using Docker (founderHub-exe201-backend)
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v3
+
+      - name: Clean old source code on VPS
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_KEY }}
+          port: 22
+          script: |
+            rm -rf /var/www/founderHub-exe201-backend
+
+      - name: Copy source code to VPS via SCP
+        uses: appleboy/scp-action@v0.1.4
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_KEY }}
+          port: 22
+          source: "."
+          target: "/var/www/founderHub-exe201-backend"
+
+      - name: SSH into VPS and deploy container
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_KEY }}
+          port: 22
+          script: |
+            cd /var/www/founderHub-exe201-backend
+
+            # Ghi nội dung .env từ GitHub Secret
+            echo "${{ secrets.ENV_FILE }}" > .env
+
+            # Dừng và xóa container cũ nếu có
+            docker stop founderhub-exe201-backend || true
+            docker rm founderhub-exe201-backend || true
+
+            # Build lại Docker image
+            docker build --no-cache -t founderhub-exe201-backend .
+
+            # Chạy container mới (host 1801 -> container 8080)
+            docker run -d --name founderhub-exe201-backend -p 1801:8080 --env-file .env founderhub-exe201-backend
