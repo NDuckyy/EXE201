@@ -1,0 +1,106 @@
+name: EXE201 Backend – Build & Deploy
+
+on:
+  push:
+    branches: [ "master" ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+
+      - name: Build (skip tests nếu muốn)
+        run: mvn -B -DskipTests package
+
+      # Đóng gói JAR thành tar (giữ đơn giản như cũ, dễ scp)
+      - name: Pack artifact
+        run: |
+          mkdir -p build
+          cp target/*SNAPSHOT.jar build/app.jar
+          tar -czf build/app.tar.gz -C build app.jar
+
+      - name: Upload artifact (tùy chọn)
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-tar
+          path: build/app.tar.gz
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: app-tar
+          path: build
+
+      # ====== SCP (giống cũ nhưng THÊM passphrase) ======
+      - name: Copy artifact to server
+        uses: appleboy/scp-action@v0.1.4
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_KEY }}                 # private key OpenSSH
+          passphrase: ${{ secrets.SSH_PASSPHRASE }}   # <-- SỬA: thêm passphrase
+          port: 22
+          fingerprint: ${{ secrets.VPS_FINGERPRINT }} # khuyến nghị
+          source: "build/app.tar.gz"
+          target: "${{ secrets.TARGET_DIR }}"         # ví dụ: /var/www/founderHub-exe201-backend
+          overwrite: true
+          timeout: 1m
+          command_timeout: 10m
+
+      # ====== SSH (giống cũ: rm -rf rồi deploy lại) ======
+      - name: Remote deploy
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.VPSHOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_KEY }}
+          passphrase: ${{ secrets.SSH_PASSPHRASE }}   # <-- SỬA: thêm passphrase
+          port: 22
+          fingerprint: ${{ secrets.VPS_FINGERPRINT }}
+          script: |
+            set -e
+            APP_DIR="${{ secrets.TARGET_DIR }}"          # /var/www/founderHub-exe201-backend
+            SERVICE="${{ secrets.SERVICE_NAME }}"        # ví dụ: exe201
+
+            # (giữ hành vi cũ) xoá thư mục đích rồi tạo lại
+            sudo rm -rf "$APP_DIR"
+            sudo mkdir -p "$APP_DIR"
+            sudo chown -R $USER:$USER "$APP_DIR"
+
+            # chuyển file lên và giải nén
+            mv "$APP_DIR/app.tar.gz" "$APP_DIR/"
+            tar -xzf "$APP_DIR/app.tar.gz" -C "$APP_DIR"
+            rm "$APP_DIR/app.tar.gz"
+
+            # cấu hình ENV đúng key Spring (SỬA từ MONGO_URI -> SPRING_DATA_MONGODB_URI)
+            # nếu bạn chạy bằng systemd:
+            sudo mkdir -p /etc/systemd/system/${SERVICE}.service.d
+            sudo bash -c "cat > /etc/systemd/system/${SERVICE}.service.d/override.conf" <<'EOF'
+            [Service]
+            Environment="SPRING_PROFILES_ACTIVE=prod"
+            Environment="SPRING_DATA_MONGODB_URI=${SPRING_DATA_MONGODB_URI}"
+            Environment="SPRING_DATA_MONGODB_DATABASE=exe201-database"
+            WorkingDirectory=${APP_DIR}
+            ExecStart=/usr/bin/java -jar ${APP_DIR}/app.jar
+            EOF
+
+            # restart service
+            sudo systemctl daemon-reload
+            sudo systemctl enable ${SERVICE} || true
+            sudo systemctl restart ${SERVICE}
+            sudo systemctl status --no-pager -l ${SERVICE} || true
