@@ -1,6 +1,7 @@
 package exe.exe201be.pojo;
 
 import exe.exe201be.pojo.type.Gender;
+import exe.exe201be.pojo.type.Status;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
@@ -33,6 +34,7 @@ public class User {
     private String password;
 
     @Schema(description = "Full name of the user", example = "John Doe")
+    @Field("full_name")
     @Indexed
     private String fullName;
 
@@ -46,7 +48,7 @@ public class User {
 
     @Schema(description = "Status of the user", example = "true")
     @Indexed
-    private boolean status;
+    private Status status;
 
     @CreatedDate
     @Schema(description = "Timestamp when the user was created")
