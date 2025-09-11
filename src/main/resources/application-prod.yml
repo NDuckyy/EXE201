@@ -1,6 +1,0 @@
-spring:
-  data:
-    mongodb:
-      uri: HEHE
-      database: EXE201
-      auto-index-creation: true
