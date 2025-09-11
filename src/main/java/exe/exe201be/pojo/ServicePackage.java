@@ -1,5 +1,6 @@
 package exe.exe201be.pojo;
 
+import exe.exe201be.pojo.type.Status;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
@@ -56,7 +57,7 @@ public class ServicePackage {
 
     @Schema(description = "status", example = "active")
     @Indexed
-    private String status;
+    private Status status;
 
     @Schema(description = "Created at (auto)")
     @Field("created_at")

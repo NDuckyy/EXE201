@@ -1,5 +1,6 @@
 package exe.exe201be.pojo;
 
+import exe.exe201be.pojo.type.Status;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
@@ -47,7 +48,7 @@ public class ServiceProvider {
 
     @Schema(description = "Status of the service provider", example = "active")
     @Indexed
-    private String status;
+    private Status status;
 
     @Schema(description = "Timestamp when the service provider was created")
     @Field("created_at")

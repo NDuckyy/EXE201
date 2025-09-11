@@ -10,6 +10,8 @@ public enum ErrorCode {
     EMAIL_INVALID(1002, "Email should be valid"),
     PASSWORD_INVALID(1003, "Password must be at least 6 characters long"),
     PHONE_INVALID(1004, "Phone number must be valid (e.g., +1234567890)"),
+    SERVICE_PACKAGE_NOT_FOUND(404, "Service package not found"),
+    SERVICE_PROVIDER_NOT_FOUND(404, "Service provider not found"),
     ;
     ErrorCode(int code, String message) {
         this.code = code;
