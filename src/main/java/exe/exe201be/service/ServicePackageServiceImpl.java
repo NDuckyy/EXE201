@@ -65,15 +65,14 @@ public class ServicePackageServiceImpl implements ServicePackageService {
     @Override
     public SearchResponse<ServicePackage> searchServicePackages(SearchRequest request) {
         Pageable pageable = PageRequest.of(
-                request.getPage(),
+                request.getPage() - 1,
                 request.getSize(),
                 Sort.by(Sort.Direction.fromString(request.getSortDir()), request.getSortBy()));
         Page<ServicePackage> servicePackages = servicePackageRepository.findByNameContaining(request.getKeyword(), pageable);
-
         if (servicePackages.hasContent()) {
             return SearchResponse.<ServicePackage>builder()
                     .content(servicePackages.getContent())
-                    .page(servicePackages.getNumber())
+                    .page(servicePackages.getNumber() + 1)
                     .size(servicePackages.getSize())
                     .totalPages(servicePackages.getTotalPages())
                     .totalElements(servicePackages.getTotalElements())
