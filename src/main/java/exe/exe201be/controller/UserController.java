@@ -22,7 +22,7 @@ public class UserController {
     @Autowired
     private UserService userService;
 
-    @GetMapping("/getAll")
+    @GetMapping("/getAllUser")
     @Operation(summary = "Find All User", description = "Returns all users")
     @ApiResponses(value = {
             @ApiResponse(
