@@ -8,5 +8,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface ServicePackageRepository extends MongoRepository<ServicePackage, String> {
-    Page<ServicePackage> findByNameContaining(String keyword, Pageable pageable);
+    Page<ServicePackage> findByNameContainingIgnoreCase(String keyword, Pageable pageable);
 }
