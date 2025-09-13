@@ -1,4 +1,4 @@
-package exe.exe201be.service;
+package exe.exe201be.service.ServiceProvider;
 
 import exe.exe201be.pojo.ServiceProvider;
 
