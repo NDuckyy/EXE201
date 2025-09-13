@@ -1,4 +1,4 @@
-package exe.exe201be.service;
+package exe.exe201be.service.ServicePackage;
 
 import exe.exe201be.dto.request.SearchRequest;
 import exe.exe201be.dto.response.SearchResponse;
@@ -14,7 +14,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
