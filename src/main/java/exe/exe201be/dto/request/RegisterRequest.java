@@ -1,5 +1,6 @@
 package exe.exe201be.dto.request;
 
+import exe.exe201be.pojo.type.Gender;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
@@ -18,7 +19,7 @@ public class RegisterRequest {
 
     private String avatarUrl;
     private String phone;
-    private String gender;
+    private Gender gender;
     private String address;
     private String image;
 }
