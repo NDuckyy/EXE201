@@ -1,17 +1,14 @@
 package exe.exe201be.controller;
 
-import exe.exe201be.dto.request.CreateUserRequest;
 import exe.exe201be.dto.response.APIResponse;
 import exe.exe201be.pojo.User;
-import exe.exe201be.service.UserService;
+import exe.exe201be.service.UserService.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;

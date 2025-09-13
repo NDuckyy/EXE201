@@ -12,6 +12,8 @@ public enum ErrorCode {
     PHONE_INVALID(1004, "Phone number must be valid (e.g., +1234567890)"),
     SERVICE_PACKAGE_NOT_FOUND(404, "Service package not found"),
     SERVICE_PROVIDER_NOT_FOUND(404, "Service provider not found"),
+    INVALID_LOGIN(401, "Invalid username or password")
+
     ;
     ErrorCode(int code, String message) {
         this.code = code;

@@ -1,9 +1,8 @@
-package exe.exe201be.service;
+package exe.exe201be.service.ServicePackage;
 
 import exe.exe201be.dto.request.SearchRequest;
 import exe.exe201be.dto.response.SearchResponse;
 import exe.exe201be.pojo.ServicePackage;
-import org.springframework.data.domain.Page;
 
 import java.util.List;
 

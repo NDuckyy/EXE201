@@ -2,7 +2,7 @@ package exe.exe201be.controller;
 
 import exe.exe201be.dto.response.APIResponse;
 import exe.exe201be.pojo.ServiceProvider;
-import exe.exe201be.service.ServiceProviderService;
+import exe.exe201be.service.ServiceProvider.ServiceProviderService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
