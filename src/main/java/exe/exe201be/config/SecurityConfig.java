@@ -65,6 +65,12 @@ public class SecurityConfig {
                                 "/api/service-providers/{id}"
                                 ).permitAll()
 
+                        .requestMatchers(HttpMethod.DELETE,
+                                "/api/users/{id}").permitAll()
+
+                        .requestMatchers(HttpMethod.PUT,
+                                "/api/users/{id}").permitAll()
+
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
