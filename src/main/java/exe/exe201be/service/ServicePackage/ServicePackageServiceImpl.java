@@ -2,11 +2,15 @@ package exe.exe201be.service.ServicePackage;
 
 import exe.exe201be.dto.request.SearchRequest;
 import exe.exe201be.dto.response.SearchResponse;
+import exe.exe201be.dto.response.ServicePackageResponse;
+import exe.exe201be.dto.response.ServiceProviderResponse;
 import exe.exe201be.exception.AppException;
 import exe.exe201be.exception.ErrorCode;
 import exe.exe201be.pojo.ServicePackage;
+import exe.exe201be.pojo.ServiceProvider;
 import exe.exe201be.pojo.type.Status;
 import exe.exe201be.repository.ServicePackageRepository;
+import exe.exe201be.repository.ServiceProviderRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -15,15 +19,64 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 public class ServicePackageServiceImpl implements ServicePackageService {
     @Autowired
     private ServicePackageRepository servicePackageRepository;
 
+    @Autowired
+    private ServiceProviderRepository serviceProviderRepository;
+
     @Override
-    public List<ServicePackage> getAllServicePackages() {
-        return servicePackageRepository.findAll();
+    public List<ServicePackageResponse> getAllServicePackages() {
+        List<ServicePackage> servicePackages = servicePackageRepository.findAll();
+        if (servicePackages.isEmpty()) {
+            return null;
+        }
+
+        Set<String> serviceProviders = servicePackages.stream()
+                .map(ServicePackage::getProviderId)
+                .filter(Objects::nonNull)
+                .filter(id -> !id.isBlank())
+                .collect(Collectors.toSet());
+
+        Map<String, ServiceProvider> providersById = serviceProviderRepository.findAllById(serviceProviders).stream()
+                .collect(Collectors.toMap(ServiceProvider::getId, Function.identity()));
+
+        return servicePackages.stream()
+                .map(sp -> {
+                    ServiceProvider provider = providersById.get(sp.getProviderId());
+                    ServiceProviderResponse providerResponse = (provider == null) ? null :
+                    ServiceProviderResponse.builder()
+                            .id(provider.getId())
+                            .name(provider.getName())
+                            .contactEmail(provider.getContactEmail())
+                            .phoneNumber(provider.getPhoneNumber())
+                            .address(provider.getAddress())
+                            .website(provider.getWebsite())
+                            .build();
+
+                    return ServicePackageResponse.builder()
+                            .id(sp.getId())
+                            .providerId(providerResponse)
+                            .name(sp.getName())
+                            .description(sp.getDescription())
+                            .price(sp.getPrice())
+                            .currency(sp.getCurrency())
+                            .durationMonths(sp.getDurationMonths())
+                            .discountPercent(sp.getDiscountPercent())
+                            .features(sp.getFeatures())
+                            .image(sp.getImage())
+                            .status(sp.getStatus())
+                            .build();
+                })
+                .collect(Collectors.toList());
     }
 
     @Override

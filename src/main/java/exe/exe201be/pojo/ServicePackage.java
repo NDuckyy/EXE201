@@ -12,6 +12,7 @@ import org.springframework.data.mongodb.core.mapping.Field;
 
 import java.time.Instant;
 import java.util.Date;
+import java.util.List;
 
 @Document(collection = "service_packages")
 @Getter
@@ -54,6 +55,14 @@ public class ServicePackage {
     @Field("discount_percent")
     @Indexed
     private Integer discountPercent;
+
+    @Schema(description = "List of features included in the package", example = "[\"Feature 1\", \"Feature 2\"]")
+    @Indexed
+    private List<String> features;
+
+    @Schema(description = "Image URL", example = "https://example.com/image.jpg")
+    @Indexed
+    private String image;
 
     @Schema(description = "status", example = "active")
     @Indexed
