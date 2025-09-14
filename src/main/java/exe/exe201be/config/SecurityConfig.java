@@ -54,13 +54,21 @@ public class SecurityConfig {
                                 "/api/service-packages/*",
                                 "/api/service-providers",
                                 "/api/service-providers/*",
-                                "/api/users/getAllUser"
+                                "/api/users/getAllUser",
+                                "/api/users/{id}"
                                 ).permitAll()
 
                         .requestMatchers(HttpMethod.PATCH,
                                 "/api/service-packages/{id}",
                                 "/api/service-providers/{id}"
                                 ).permitAll()
+
+                        .requestMatchers(HttpMethod.DELETE,
+                                "/api/users/{id}").permitAll()
+
+                        .requestMatchers(HttpMethod.PUT,
+                                "/api/users/{id}"
+                        ).permitAll()
 
                         .anyRequest().authenticated()
                 )
