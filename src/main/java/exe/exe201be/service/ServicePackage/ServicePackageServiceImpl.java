@@ -7,6 +7,7 @@ import exe.exe201be.dto.response.ServiceProviderResponse;
 import exe.exe201be.exception.AppException;
 import exe.exe201be.exception.ErrorCode;
 import exe.exe201be.pojo.ServicePackage;
+import exe.exe201be.pojo.ServiceProvider;
 import exe.exe201be.pojo.type.Status;
 import exe.exe201be.repository.ServicePackageRepository;
 import exe.exe201be.repository.ServiceProviderRepository;
@@ -18,6 +19,10 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
@@ -31,24 +36,35 @@ public class ServicePackageServiceImpl implements ServicePackageService {
     @Override
     public List<ServicePackageResponse> getAllServicePackages() {
         List<ServicePackage> servicePackages = servicePackageRepository.findAll();
+        if (servicePackages.isEmpty()) {
+            return null;
+        }
+
+        Set<String> serviceProviders = servicePackages.stream()
+                .map(ServicePackage::getProviderId)
+                .filter(Objects::nonNull)
+                .filter(id -> !id.isBlank())
+                .collect(Collectors.toSet());
+
+        Map<String, ServiceProvider> providersById = serviceProviderRepository.findAllById(serviceProviders).stream()
+                .collect(Collectors.toMap(ServiceProvider::getId, Function.identity()));
 
         return servicePackages.stream()
                 .map(sp -> {
-                    ServiceProviderResponse providerDto = serviceProviderRepository.findById(sp.getProviderId())
-                            .map(provider -> ServiceProviderResponse.builder()
-                                    .id(provider.getId())
-                                    .name(provider.getName())
-                                    .contactEmail(provider.getContactEmail())
-                                    .phoneNumber(provider.getPhoneNumber())
-                                    .address(provider.getAddress())
-                                    .website(provider.getWebsite())
-                                    .build())
-                            .orElse(null);
-
+                    ServiceProvider provider = providersById.get(sp.getProviderId());
+                    ServiceProviderResponse providerResponse = (provider == null) ? null :
+                    ServiceProviderResponse.builder()
+                            .id(provider.getId())
+                            .name(provider.getName())
+                            .contactEmail(provider.getContactEmail())
+                            .phoneNumber(provider.getPhoneNumber())
+                            .address(provider.getAddress())
+                            .website(provider.getWebsite())
+                            .build();
 
                     return ServicePackageResponse.builder()
                             .id(sp.getId())
-                            .providerId(providerDto)   // DTO, không trả về object Mongo
+                            .providerId(providerResponse)
                             .name(sp.getName())
                             .description(sp.getDescription())
                             .price(sp.getPrice())

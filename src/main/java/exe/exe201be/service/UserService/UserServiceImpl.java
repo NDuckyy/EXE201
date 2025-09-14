@@ -110,7 +110,7 @@ public class UserServiceImpl implements UserService {
         dto.setGender(u.getGender());
         dto.setAddress(u.getAddress());
         dto.setImage(u.getImage());
-        dto.setStatus(u.getStatus().toString());
+        dto.setStatus(u.getStatus());
         // nếu UserResponse còn field nào khác, set thêm ở đây
         return dto;
     }

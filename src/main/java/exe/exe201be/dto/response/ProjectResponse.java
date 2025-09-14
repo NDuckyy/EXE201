@@ -23,7 +23,7 @@ public class ProjectResponse {
     private String description;
 
     @Schema(description = "Identifier of the project manager", example = "507f1f77bcf86cd799439011")
-    private User managerId;
+    private UserResponse managerId;
 
     @Schema(description = "Status of the project", example = "active")
     private Status status;

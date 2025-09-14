@@ -1,6 +1,7 @@
 package exe.exe201be.controller;
 
 import exe.exe201be.dto.response.APIResponse;
+import exe.exe201be.dto.response.ProjectResponse;
 import exe.exe201be.pojo.Project;
 import exe.exe201be.service.Project.ProjectService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -30,8 +31,8 @@ public class ProjectController {
                             schema = @Schema(implementation = Project.class))
             )
     })
-    public APIResponse<List<Project>> getAllProjects() {
-        APIResponse<List<Project>> response = new APIResponse<>();
+    public APIResponse<List<ProjectResponse>> getAllProjects() {
+        APIResponse<List<ProjectResponse>> response = new APIResponse<>();
         response.setMessage("Success");
         response.setData(projectService.getAllProjects());
         return response;
