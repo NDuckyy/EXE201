@@ -3,6 +3,7 @@ package exe.exe201be.controller;
 import exe.exe201be.dto.request.SearchRequest;
 import exe.exe201be.dto.response.APIResponse;
 import exe.exe201be.dto.response.SearchResponse;
+import exe.exe201be.dto.response.ServicePackageResponse;
 import exe.exe201be.pojo.ServicePackage;
 import exe.exe201be.service.ServicePackage.ServicePackageService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -32,8 +33,8 @@ public class ServicePackageController {
                             schema = @Schema(implementation = ServicePackage.class))
             ),
     })
-    public APIResponse<List<ServicePackage>> getAllServicePackages() {
-        APIResponse<List<ServicePackage>> response = new APIResponse<>();
+    public APIResponse<List<ServicePackageResponse>> getAllServicePackages() {
+        APIResponse<List<ServicePackageResponse>> response = new APIResponse<>();
         response.setMessage("Success");
         response.setData(servicePackageService.getAllServicePackages());
         return response;

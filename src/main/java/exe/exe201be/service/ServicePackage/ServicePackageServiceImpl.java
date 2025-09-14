@@ -2,11 +2,14 @@ package exe.exe201be.service.ServicePackage;
 
 import exe.exe201be.dto.request.SearchRequest;
 import exe.exe201be.dto.response.SearchResponse;
+import exe.exe201be.dto.response.ServicePackageResponse;
+import exe.exe201be.dto.response.ServiceProviderResponse;
 import exe.exe201be.exception.AppException;
 import exe.exe201be.exception.ErrorCode;
 import exe.exe201be.pojo.ServicePackage;
 import exe.exe201be.pojo.type.Status;
 import exe.exe201be.repository.ServicePackageRepository;
+import exe.exe201be.repository.ServiceProviderRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -15,15 +18,49 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class ServicePackageServiceImpl implements ServicePackageService {
     @Autowired
     private ServicePackageRepository servicePackageRepository;
 
+    @Autowired
+    private ServiceProviderRepository serviceProviderRepository;
+
     @Override
-    public List<ServicePackage> getAllServicePackages() {
-        return servicePackageRepository.findAll();
+    public List<ServicePackageResponse> getAllServicePackages() {
+        List<ServicePackage> servicePackages = servicePackageRepository.findAll();
+
+        return servicePackages.stream()
+                .map(sp -> {
+                    ServiceProviderResponse providerDto = serviceProviderRepository.findById(sp.getProviderId())
+                            .map(provider -> ServiceProviderResponse.builder()
+                                    .id(provider.getId())
+                                    .name(provider.getName())
+                                    .contactEmail(provider.getContactEmail())
+                                    .phoneNumber(provider.getPhoneNumber())
+                                    .address(provider.getAddress())
+                                    .website(provider.getWebsite())
+                                    .build())
+                            .orElse(null);
+
+
+                    return ServicePackageResponse.builder()
+                            .id(sp.getId())
+                            .providerId(providerDto)   // DTO, không trả về object Mongo
+                            .name(sp.getName())
+                            .description(sp.getDescription())
+                            .price(sp.getPrice())
+                            .currency(sp.getCurrency())
+                            .durationMonths(sp.getDurationMonths())
+                            .discountPercent(sp.getDiscountPercent())
+                            .features(sp.getFeatures())
+                            .image(sp.getImage())
+                            .status(sp.getStatus())
+                            .build();
+                })
+                .collect(Collectors.toList());
     }
 
     @Override

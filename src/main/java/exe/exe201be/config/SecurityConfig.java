@@ -55,20 +55,15 @@ public class SecurityConfig {
                                 "/api/service-providers",
                                 "/api/service-providers/*",
                                 "/api/users/getAllUser",
-                                "/api/users/{id}"
+                                "/api/users/{id}",
+                                "/api/projects",
+                                "/api/projects/{id}"
                                 ).permitAll()
 
                         .requestMatchers(HttpMethod.PATCH,
                                 "/api/service-packages/{id}",
                                 "/api/service-providers/{id}"
                                 ).permitAll()
-
-                        .requestMatchers(HttpMethod.DELETE,
-                                "/api/users/{id}").permitAll()
-
-                        .requestMatchers(HttpMethod.PUT,
-                                "/api/users/{id}"
-                        ).permitAll()
 
                         .anyRequest().authenticated()
                 )
@@ -85,11 +80,5 @@ public class SecurityConfig {
         var source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", cfg);
         return source;
-    }
-
-
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder(10);
     }
 }
