@@ -1,7 +1,10 @@
 package exe.exe201be.pojo;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
+import org.bson.types.ObjectId;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
@@ -19,12 +22,13 @@ import java.time.Instant;
 @Builder
 public class TaskCheckList {
     @Id
-    private String id;
+    @JsonSerialize(using = ToStringSerializer.class)
+    private ObjectId id;
 
     @Schema(description = "Unique identifier of the task", example = "507f1f77bcf86cd799439021")
     @Field("task_id")
     @Indexed
-    private String taskId;
+    private ObjectId taskId;
 
     @Schema(description = "Description of the checklist item", example = "Design the UI mockups")
     @Indexed

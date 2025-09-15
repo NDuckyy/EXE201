@@ -11,6 +11,7 @@ import exe.exe201be.repository.RoleRepository;
 import exe.exe201be.repository.UserGlobalRepository;
 import exe.exe201be.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.bson.types.ObjectId;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -67,14 +68,16 @@ public class UserServiceImpl implements UserService {
     // ====== READ BY ID ======
     @Override
     public User getUserById(String id) {
-        return userRepository.findById(id)
+        ObjectId objectId = new ObjectId(id);
+        return userRepository.findById(objectId)
                 .orElseThrow(() -> new NoSuchElementException("User not found with id: " + id));
     }
 
     // ====== UPDATE (partial, không dùng mapper) ======
     @Override
     public User updateUser(String id, UserUpdateRequest req) {
-        User existing = userRepository.findById(id)
+        ObjectId objectId = new ObjectId(id);
+        User existing = userRepository.findById(objectId)
                 .orElseThrow(() -> new NoSuchElementException("User not found with id: " + id));
 
         // Chỉ set các field có giá trị (tránh ghi đè null)
@@ -92,17 +95,25 @@ public class UserServiceImpl implements UserService {
     // ====== SOFT DELETE ======
     @Override
     public void deleteUser(String id) {
-        User existing = userRepository.findById(id)
+        ObjectId objectId = new ObjectId(id);
+        User existing = userRepository.findById(objectId)
                 .orElseThrow(() -> new NoSuchElementException("User not found with id: " + id));
         existing.setStatus(Status.INACTIVE);
         userRepository.save(existing);
+    }
+
+    @Override
+    public User getUserByEmail(String email) {
+        String normalizedEmail = normalizeEmail(email);
+        if (normalizedEmail == null) return null;
+        return userRepository.findByEmail(normalizedEmail);
     }
 
     // ====== Helpers ======
     private UserResponse toResponse(User u) {
         // Map Entity -> DTO bằng tay
         UserResponse dto = new UserResponse();
-        dto.setId(u.getId());
+        dto.setId(u.getId().toHexString());
         dto.setEmail(u.getEmail());
         dto.setFullName(u.getFullName());
         dto.setAvatarUrl(u.getAvatar_url()); // lưu ý khác tên: avatar_url -> avatarUrl

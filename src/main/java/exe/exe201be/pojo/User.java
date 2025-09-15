@@ -1,9 +1,12 @@
 package exe.exe201be.pojo;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import exe.exe201be.pojo.type.Gender;
 import exe.exe201be.pojo.type.Status;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
+import org.bson.types.ObjectId;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.LastModifiedDate;
@@ -23,7 +26,8 @@ import java.time.Instant;
 public class User {
     @Id
     @Schema(description = "Unique identifier of the user", example = "507f1f77bcf86cd799439011")
-    private String id;
+    @JsonSerialize(using = ToStringSerializer.class)
+    private ObjectId id;
 
     @Schema(description = "Email of the user", example = "john_doe@gmail.com")
     @Indexed

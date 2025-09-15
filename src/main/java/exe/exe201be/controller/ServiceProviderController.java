@@ -1,6 +1,8 @@
 package exe.exe201be.controller;
 
+import exe.exe201be.dto.request.CreateServiceProviderRequest;
 import exe.exe201be.dto.response.APIResponse;
+import exe.exe201be.dto.response.ServiceProviderResponse;
 import exe.exe201be.pojo.ServiceProvider;
 import exe.exe201be.service.ServiceProvider.ServiceProviderService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -70,6 +72,25 @@ public class ServiceProviderController {
         APIResponse<?> response = new APIResponse<>();
         serviceProviderService.changeStatusServiceProvider(id);
         response.setMessage("Change status service provider success");
+        return response;
+    }
+
+    @PostMapping
+    @Operation(summary = "Create Service Provider", description = "Create a new service provider")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Service provider created successfully",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ServiceProviderResponse.class))
+            )
+    })
+    public APIResponse<ServiceProviderResponse> createServiceProvider(@RequestBody  CreateServiceProviderRequest request) {
+        ServiceProviderResponse serviceProviderResponse = serviceProviderService.createServiceProvider(request);
+        APIResponse<ServiceProviderResponse> response = new APIResponse<>();
+        response.setMessage("Create service provider success");
+        response.setData(serviceProviderResponse);
         return response;
     }
 

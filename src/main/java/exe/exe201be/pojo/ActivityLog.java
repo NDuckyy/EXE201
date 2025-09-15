@@ -1,7 +1,10 @@
 package exe.exe201be.pojo;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
+import org.bson.types.ObjectId;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
@@ -20,17 +23,18 @@ import java.util.Date;
 public class ActivityLog {
 
     @Id
-    private String id;
+    @JsonSerialize(using = ToStringSerializer.class)
+    private ObjectId id;
 
     @Schema(description = "ID of the related task", example = "64f444000000000000000001")
     @Field("task_id")
     @Indexed
-    private String taskId;
+    private ObjectId taskId;
 
     @Schema(description = "ID of the user affected by this activity", example = "64f000000000000000000001")
     @Field("user_id")
     @Indexed
-    private String userId;
+    private ObjectId userId;
 
     @Schema(description = "ID of the user who performed the action", example = "64f000000000000000000001")
     @Field("performed_by")

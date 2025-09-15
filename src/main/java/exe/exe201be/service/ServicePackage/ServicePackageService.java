@@ -9,9 +9,9 @@ import java.util.List;
 
 public interface ServicePackageService {
     List<ServicePackageResponse> getAllServicePackages();
-    ServicePackage getServicePackageById(String id);
-    ServicePackage createServicePackage(ServicePackageService servicePackage);
-    ServicePackage updateServicePackage(String id, ServicePackageService servicePackage);
+    ServicePackageResponse getServicePackageById(String id);
+    ServicePackageResponse createServicePackage(ServicePackageService servicePackage);
+    ServicePackageResponse updateServicePackage(String id, ServicePackageService servicePackage);
     void changeStatusServicePackage(String id);
-    SearchResponse<ServicePackage> searchServicePackages(SearchRequest request);
+    SearchResponse<ServicePackageResponse> searchServicePackages(SearchRequest request);
 }

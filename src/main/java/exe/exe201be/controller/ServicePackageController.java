@@ -51,8 +51,8 @@ public class ServicePackageController {
                             schema = @Schema(implementation = ServicePackage.class))
             ),
     })
-    public APIResponse<ServicePackage> getServicePackageById(@PathVariable String id) {
-        APIResponse<ServicePackage> response = new APIResponse<>();
+    public APIResponse<ServicePackageResponse> getServicePackageById(@PathVariable String id) {
+        APIResponse<ServicePackageResponse> response = new APIResponse<>();
         response.setMessage("Get service package by id success");
         response.setData(servicePackageService.getServicePackageById(id));
         return response;
@@ -87,7 +87,7 @@ public class ServicePackageController {
                             schema = @Schema(implementation = APIResponse.class))
             ),
     })
-    public APIResponse<SearchResponse<ServicePackage>> searchServicePackages(
+    public APIResponse<SearchResponse<ServicePackageResponse>> searchServicePackages(
             @RequestParam(value = "keyword", required = false, defaultValue = "") String keyword,
             @RequestParam(value = "page", required = false, defaultValue = "1") int page,
             @RequestParam(value = "size", required = false, defaultValue = "10") int size,
@@ -96,7 +96,7 @@ public class ServicePackageController {
     ) {
         SearchRequest searchRequest = new SearchRequest(keyword, page, size, sortBy, sortDir);
 
-        APIResponse<SearchResponse<ServicePackage>> response = new APIResponse<>();
+        APIResponse<SearchResponse<ServicePackageResponse>> response = new APIResponse<>();
         response.setMessage("Search service packages success");
         response.setData(servicePackageService.searchServicePackages(searchRequest));
         return response;

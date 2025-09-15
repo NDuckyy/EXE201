@@ -14,6 +14,11 @@ public enum ErrorCode {
     SERVICE_PROVIDER_NOT_FOUND(404, "Service provider not found"),
     INVALID_LOGIN(401, "Invalid username or password"),
     PROJECT_NOT_FOUND(404, "Project not found"),
+    SERVICE_PROVIDER_NAME_ALREADY_EXISTS(409, "Service provider name already exists"),
+    SERVICE_PROVIDER_CONTACT_EMAIL_ALREADY_EXISTS(409, "Service provider contact email already exists"),
+    SERVICE_PROVIDER_PHONE_NUMBER_ALREADY_EXISTS(409, "Service provider phone number already exists"),
+    ROLE_NOT_FOUND(404, "Role not found"),
+    USER_GLOBAL_NOT_FOUND(404, "User global not found"),
     ;
     ErrorCode(int code, String message) {
         this.code = code;

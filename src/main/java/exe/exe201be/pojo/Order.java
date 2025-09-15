@@ -1,7 +1,10 @@
 package exe.exe201be.pojo;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
+import org.bson.types.ObjectId;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
@@ -20,17 +23,18 @@ import java.util.Date;
 public class Order {
 
     @Id
-    private String id;
+    @JsonSerialize(using = ToStringSerializer.class)
+    private ObjectId id;
 
     @Schema(description = "ID of the user who created the order", example = "64f000000000000000000001")
     @Field("user_id")
     @Indexed
-    private String userId;
+    private ObjectId userId;
 
     @Schema(description = "Payment transaction ID", example = "651300000000000000000001")
     @Field("payment_id")
     @Indexed
-    private String paymentId;
+    private ObjectId paymentId;
 
     @Schema(description = "Total amount of the order", example = "98.0")
     @Indexed

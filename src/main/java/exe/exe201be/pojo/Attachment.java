@@ -1,7 +1,10 @@
 package exe.exe201be.pojo;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
+import org.bson.types.ObjectId;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
@@ -20,12 +23,13 @@ import java.util.Date;
 public class Attachment {
 
     @Id
-    private String id;
+    @JsonSerialize(using = ToStringSerializer.class)
+    private ObjectId id;
 
     @Schema(description = "ID of the task this file belongs to", example = "64f444000000000000000001")
     @Field("task_id")
     @Indexed
-    private String taskId;
+    private ObjectId taskId;
 
     @Schema(description = "URL of the uploaded file", example = "https://example.com/files/wireframe_homepage.png")
     @Field("file_url")
