@@ -49,8 +49,8 @@ public class ProjectController {
                             schema = @Schema(implementation = Project.class))
             )
     })
-    public APIResponse<Project> getProjectById(@PathVariable  String id) {
-        APIResponse<Project> response = new APIResponse<>();
+    public APIResponse<ProjectResponse> getProjectById(@PathVariable  String id) {
+        APIResponse<ProjectResponse> response = new APIResponse<>();
         response.setMessage("Success");
         response.setData(projectService.getProjectById(id));
         return response;

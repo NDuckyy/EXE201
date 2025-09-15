@@ -17,6 +17,8 @@ app:
     region: ap-southeast-2
     s3:
       bucket: exe201-s3
+  jwt:
+    secret-base64: ckInpXLuyPjlGUimIoqhIMTyx1ZuCxSQoyIgrEs22dg=
 
 server:
   forward-headers-strategy: native   # Quan trọng: để Spring nhận X-Forwarded-* headers

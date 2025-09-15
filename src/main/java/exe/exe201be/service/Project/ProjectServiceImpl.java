@@ -9,6 +9,7 @@ import exe.exe201be.pojo.User;
 import exe.exe201be.pojo.type.Status;
 import exe.exe201be.repository.ProjectRepository;
 import exe.exe201be.repository.UserRepository;
+import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -33,68 +34,75 @@ public class ProjectServiceImpl implements ProjectService {
         List<Project> projects = projectRepository.findAll();
         if (projects.isEmpty()) return List.of();
 
-        Set<String> managerIds = projects.stream()
+        Set<ObjectId> managerIds = projects.stream()
                 .map(Project::getManagerId)
                 .filter(Objects::nonNull)
-                .filter(id -> !id.isBlank())
                 .collect(Collectors.toSet());
 
-        Map<String, User> usersById = userRepository.findAllById(managerIds).stream()
+        Map<ObjectId, User> usersById = userRepository.findAllById(managerIds).stream()
                 .collect(Collectors.toMap(User::getId, Function.identity()));
 
         return projects.stream()
                 .map(project -> {
                     User user = usersById.get(project.getManagerId());
-                    UserResponse userResponse = user == null ? null :
-                            UserResponse.builder()
-                                    .id(user.getId())
-                                    .fullName(user.getFullName())
-                                    .email(user.getEmail())
-                                    .phone(user.getPhone())
-                                    .gender(user.getGender())
-                                    .avatarUrl(user.getAvatar_url())
-                                    .image(user.getImage())
-                                    .address(user.getAddress())
-                                    .status(user.getStatus())
-                                    .build();
-
-                    return ProjectResponse.builder()
-                            .id(project.getId())
-                            .name(project.getName())
-                            .description(project.getDescription())
-                            .managerId(userResponse)
-                            .startDate(project.getStartDate())
-                            .endDate(project.getEndDate())
-                            .status(project.getStatus())
-                            .teamSize(project.getTeamSize())
-                            .progress(project.getProgress())
-                            .build();
+                    return getProjectResponse(project, user);
                 })
                 .collect(Collectors.toList());
     }
 
     @Override
-    public Project getProjectById(String id) {
-        Project project = projectRepository.findById(id).orElse(null);
+    public ProjectResponse getProjectById(String id) {
+        ObjectId objectId = new ObjectId(id);
+        Project project = projectRepository.findById(objectId).orElse(null);
         if (project == null) {
             throw new AppException(ErrorCode.PROJECT_NOT_FOUND);
         }
-        return project;
+        User user = userRepository.findById(project.getManagerId()).orElse(null);
+
+        return getProjectResponse(project, user);
+    }
+
+    private ProjectResponse getProjectResponse(Project project, User user) {
+        UserResponse userResponse = user == null ? null :
+                UserResponse.builder()
+                        .id(user.getId().toHexString())
+                        .fullName(user.getFullName())
+                        .email(user.getEmail())
+                        .phone(user.getPhone())
+                        .gender(user.getGender())
+                        .avatarUrl(user.getAvatar_url())
+                        .image(user.getImage())
+                        .address(user.getAddress())
+                        .status(user.getStatus())
+                        .build();
+
+        return ProjectResponse.builder()
+                .id(project.getId().toHexString())
+                .name(project.getName())
+                .description(project.getDescription())
+                .managerId(userResponse)
+                .startDate(project.getStartDate())
+                .endDate(project.getEndDate())
+                .status(project.getStatus())
+                .teamSize(project.getTeamSize())
+                .progress(project.getProgress())
+                .build();
     }
 
     @Override
-    public Project createProject(Project project) {
+    public ProjectResponse createProject(Project project) {
         return null;
     }
 
     @Override
-    public Project updateProject(String id, Project project) {
+    public ProjectResponse updateProject(String id, Project project) {
         return null;
     }
 
     @Override
     public void changeStatusProject(String id) {
-        Project project = projectRepository.findById(id).orElse(null);
+        ObjectId objectId = new ObjectId(id);
+        Project project = projectRepository.findById(objectId).orElse(null);
         if (project == null) {
             throw new AppException(ErrorCode.PROJECT_NOT_FOUND);
         } else {
@@ -107,4 +115,5 @@ public class ProjectServiceImpl implements ProjectService {
             }
         }
     }
+
 }

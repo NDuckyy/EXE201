@@ -1,10 +1,13 @@
 package exe.exe201be.service.ServiceProvider;
 
+import exe.exe201be.dto.request.CreateServiceProviderRequest;
+import exe.exe201be.dto.response.ServiceProviderResponse;
 import exe.exe201be.exception.AppException;
 import exe.exe201be.exception.ErrorCode;
 import exe.exe201be.pojo.ServiceProvider;
 import exe.exe201be.pojo.type.Status;
 import exe.exe201be.repository.ServiceProviderRepository;
+import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -22,16 +25,42 @@ public class ServiceProviderServiceImpl implements ServiceProviderService {
 
     @Override
     public ServiceProvider getServiceProviderById(String id) {
-        ServiceProvider serviceProvider = serviceProviderRepository.findById(id).orElse(null);
-        if(serviceProvider == null){
+        ObjectId objectId = new ObjectId(id);
+        ServiceProvider serviceProvider = serviceProviderRepository.findById(objectId).orElse(null);
+        if (serviceProvider == null) {
             throw new AppException(ErrorCode.SERVICE_PROVIDER_NOT_FOUND);
         }
         return serviceProvider;
     }
 
     @Override
-    public ServiceProvider createServiceProvider(ServiceProvider serviceProvider) {
-        return null;
+    public ServiceProviderResponse createServiceProvider(CreateServiceProviderRequest request) {
+        if (serviceProviderRepository.existsByName(request.getName())) {
+            throw new AppException(ErrorCode.SERVICE_PROVIDER_NAME_ALREADY_EXISTS);
+        }
+        if (serviceProviderRepository.existsByContactEmail(request.getContactEmail())) {
+            throw new AppException(ErrorCode.SERVICE_PROVIDER_CONTACT_EMAIL_ALREADY_EXISTS);
+        }
+        if (serviceProviderRepository.existsByPhoneNumber(request.getPhoneNumber())) {
+            throw new AppException(ErrorCode.SERVICE_PROVIDER_PHONE_NUMBER_ALREADY_EXISTS);
+        }
+        ServiceProvider serviceProvider = ServiceProvider.builder()
+                .name(request.getName())
+                .contactEmail(request.getContactEmail())
+                .phoneNumber(request.getPhoneNumber())
+                .address(request.getAddress())
+                .status(Status.ACTIVE)
+                .build();
+
+        serviceProviderRepository.save(serviceProvider);
+        return ServiceProviderResponse.builder()
+                .id(serviceProvider.getId().toHexString())
+                .name(serviceProvider.getName())
+                .contactEmail(serviceProvider.getContactEmail())
+                .phoneNumber(serviceProvider.getPhoneNumber())
+                .address(serviceProvider.getAddress())
+                .website(serviceProvider.getWebsite())
+                .build();
     }
 
     @Override
@@ -41,11 +70,12 @@ public class ServiceProviderServiceImpl implements ServiceProviderService {
 
     @Override
     public void changeStatusServiceProvider(String id) {
-        ServiceProvider serviceProvider = serviceProviderRepository.findById(id).orElse(null);
-        if(serviceProvider == null){
+        ObjectId objectId = new ObjectId(id);
+        ServiceProvider serviceProvider = serviceProviderRepository.findById(objectId).orElse(null);
+        if (serviceProvider == null) {
             throw new AppException(ErrorCode.SERVICE_PROVIDER_NOT_FOUND);
         }
-        if(serviceProvider.getStatus() == Status.ACTIVE){
+        if (serviceProvider.getStatus() == Status.ACTIVE) {
             serviceProvider.setStatus(Status.INACTIVE);
             serviceProviderRepository.save(serviceProvider);
         } else {

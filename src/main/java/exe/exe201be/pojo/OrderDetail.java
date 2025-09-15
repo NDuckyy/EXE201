@@ -1,7 +1,10 @@
 package exe.exe201be.pojo;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
+import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -16,17 +19,18 @@ import org.springframework.data.mongodb.core.mapping.Field;
 public class OrderDetail {
 
     @Id
-    private String id;
+    @JsonSerialize(using = ToStringSerializer.class)
+    private ObjectId id;
 
     @Schema(description = "Order ID this item belongs to", example = "651200000000000000000001")
     @Field("order_id")
     @Indexed
-    private String orderId;
+    private ObjectId orderId;
 
     @Schema(description = "Package/Gig ID purchased in this item", example = "651100000000000000000002")
     @Field("package_id")
     @Indexed
-    private String packageId;
+    private ObjectId packageId;
 
     @Schema(description = "Unit price of the package at purchase time", example = "79.0")
     @Field("unit_price")

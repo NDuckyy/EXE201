@@ -1,21 +1,27 @@
 package exe.exe201be.config;
 
-import exe.exe201be.security.JwtAuthenticationFilter;
-import org.springframework.beans.factory.annotation.Autowired;
+import exe.exe201be.utils.CookieOrHeaderBearerTokenResolver;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
+import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.Collection;
+import java.util.List;
 
 @Configuration
 @EnableWebSecurity
@@ -35,7 +41,7 @@ public class SecurityConfig {
 
     @Bean
     @Order(2)
-    SecurityFilterChain apiChain(HttpSecurity http, JwtAuthenticationFilter jwtAuthFilter) throws Exception {
+    SecurityFilterChain apiChain(HttpSecurity http) throws Exception {
         return http
                 .securityMatcher("/api/**") // chỉ áp cho API
                 .csrf(csrf -> csrf.disable())
@@ -73,17 +79,32 @@ public class SecurityConfig {
 
                         .anyRequest().authenticated()
                 )
-                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
+                .oauth2ResourceServer(oauth2 -> oauth2
+                        // đọc token từ cookie "access_token" hoặc header Authorization
+                        .bearerTokenResolver(new CookieOrHeaderBearerTokenResolver("access_token"))
+                        .jwt(jwt -> jwt.jwtAuthenticationConverter(this::jwtAuthConverter))
+                )
                 .build();
+    }
+
+    private AbstractAuthenticationToken jwtAuthConverter(Jwt jwt) {
+        // Nếu bạn dùng scope/permissions trong token, map ra GrantedAuthority ở đây
+        JwtGrantedAuthoritiesConverter conv = new JwtGrantedAuthoritiesConverter();
+        conv.setAuthorityPrefix("SCOPE_");
+        conv.setAuthoritiesClaimName("scope"); // đổi sang "permissions" nếu dùng Auth0 RBAC permissions
+        Collection<GrantedAuthority> authorities = conv.convert(jwt);
+        return new JwtAuthenticationToken(jwt, authorities);
     }
 
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
-        var cfg = new CorsConfiguration();
-        cfg.addAllowedOriginPattern("*");
-        cfg.addAllowedMethod("*");
-        cfg.addAllowedHeader("*");
-        var source = new UrlBasedCorsConfigurationSource();
+        CorsConfiguration cfg = new CorsConfiguration();
+        // Khuyến nghị: chỉ định origin FE thật thay vì "*"
+        cfg.setAllowedOriginPatterns(List.of("*"));
+        cfg.setAllowedMethods(List.of("GET","POST","PUT","PATCH","DELETE","OPTIONS"));
+        cfg.setAllowedHeaders(List.of("*"));
+        cfg.setAllowCredentials(true); // cần true nếu gửi cookie
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", cfg);
         return source;
     }

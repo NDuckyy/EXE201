@@ -1,7 +1,10 @@
 package exe.exe201be.pojo;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
+import org.bson.types.ObjectId;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
@@ -20,7 +23,8 @@ import java.util.Date;
 public class Notification {
 
     @Id
-    private String id;
+    @JsonSerialize(using = ToStringSerializer.class)
+    private ObjectId id;
 
     @Schema(description = "Notification type", example = "message")
     @Indexed
@@ -38,7 +42,7 @@ public class Notification {
     @Schema(description = "User ID who receives this notification", example = "64f000000000000000000001")
     @Field("user_id")
     @Indexed
-    private String userId;
+    private ObjectId userId;
 
     @Schema(description = "Date when notification was created")
     @Field("created_at")

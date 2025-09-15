@@ -11,6 +11,7 @@ import exe.exe201be.pojo.ServiceProvider;
 import exe.exe201be.pojo.type.Status;
 import exe.exe201be.repository.ServicePackageRepository;
 import exe.exe201be.repository.ServiceProviderRepository;
+import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -40,67 +41,47 @@ public class ServicePackageServiceImpl implements ServicePackageService {
             return null;
         }
 
-        Set<String> serviceProviders = servicePackages.stream()
+        Set<ObjectId> serviceProviders = servicePackages.stream()
                 .map(ServicePackage::getProviderId)
                 .filter(Objects::nonNull)
-                .filter(id -> !id.isBlank())
                 .collect(Collectors.toSet());
 
-        Map<String, ServiceProvider> providersById = serviceProviderRepository.findAllById(serviceProviders).stream()
+        Map<ObjectId, ServiceProvider> providersById = serviceProviderRepository.findAllById(serviceProviders).stream()
                 .collect(Collectors.toMap(ServiceProvider::getId, Function.identity()));
 
         return servicePackages.stream()
                 .map(sp -> {
                     ServiceProvider provider = providersById.get(sp.getProviderId());
-                    ServiceProviderResponse providerResponse = (provider == null) ? null :
-                    ServiceProviderResponse.builder()
-                            .id(provider.getId())
-                            .name(provider.getName())
-                            .contactEmail(provider.getContactEmail())
-                            .phoneNumber(provider.getPhoneNumber())
-                            .address(provider.getAddress())
-                            .website(provider.getWebsite())
-                            .build();
-
-                    return ServicePackageResponse.builder()
-                            .id(sp.getId())
-                            .providerId(providerResponse)
-                            .name(sp.getName())
-                            .description(sp.getDescription())
-                            .price(sp.getPrice())
-                            .currency(sp.getCurrency())
-                            .durationMonths(sp.getDurationMonths())
-                            .discountPercent(sp.getDiscountPercent())
-                            .features(sp.getFeatures())
-                            .image(sp.getImage())
-                            .status(sp.getStatus())
-                            .build();
+                    return getServicePackageResponse(sp, provider);
                 })
                 .collect(Collectors.toList());
     }
 
     @Override
-    public ServicePackage getServicePackageById(String id) {
-        ServicePackage servicePackage = servicePackageRepository.findById(id).orElse(null);
+    public ServicePackageResponse getServicePackageById(String id) {
+        ObjectId objectId = new ObjectId(id);
+        ServicePackage servicePackage = servicePackageRepository.findById(objectId).orElse(null);
         if (servicePackage == null) {
             throw new AppException(ErrorCode.SERVICE_PACKAGE_NOT_FOUND);
         }
-        return servicePackage;
+        ServiceProvider serviceProvider = serviceProviderRepository.findById(servicePackage.getProviderId()).orElse(null);
+        return getServicePackageResponse(servicePackage, serviceProvider);
     }
 
     @Override
-    public ServicePackage createServicePackage(ServicePackageService servicePackage) {
+    public ServicePackageResponse createServicePackage(ServicePackageService servicePackage) {
         return null;
     }
 
     @Override
-    public ServicePackage updateServicePackage(String id, ServicePackageService servicePackage) {
+    public ServicePackageResponse updateServicePackage(String id, ServicePackageService servicePackage) {
         return null;
     }
 
     @Override
     public void changeStatusServicePackage(String id) {
-        ServicePackage servicePackage = servicePackageRepository.findById(id).orElse(null);
+        ObjectId objectId = new ObjectId(id);
+        ServicePackage servicePackage = servicePackageRepository.findById(objectId).orElse(null);
         if (servicePackage == null) {
             throw new AppException(ErrorCode.SERVICE_PACKAGE_NOT_FOUND);
         } else {
@@ -115,15 +96,20 @@ public class ServicePackageServiceImpl implements ServicePackageService {
     }
 
     @Override
-    public SearchResponse<ServicePackage> searchServicePackages(SearchRequest request) {
+    public SearchResponse<ServicePackageResponse> searchServicePackages(SearchRequest request) {
         Pageable pageable = PageRequest.of(
                 request.getPage() - 1,
                 request.getSize(),
                 Sort.by(Sort.Direction.fromString(request.getSortDir()), request.getSortBy()));
         Page<ServicePackage> servicePackages = servicePackageRepository.findByNameContainingIgnoreCase(request.getKeyword(), pageable);
+
         if (servicePackages.hasContent()) {
-            return SearchResponse.<ServicePackage>builder()
-                    .content(servicePackages.getContent())
+            return SearchResponse.<ServicePackageResponse>builder()
+                    .content(servicePackages.stream().map(sp -> {
+                        ServiceProvider provider = serviceProviderRepository.findById(sp.getProviderId()).orElse(null);
+                        return getServicePackageResponse(sp, provider);
+                    }).collect(Collectors.toList()))
+
                     .page(servicePackages.getNumber() + 1)
                     .size(servicePackages.getSize())
                     .totalPages(servicePackages.getTotalPages())
@@ -132,5 +118,31 @@ public class ServicePackageServiceImpl implements ServicePackageService {
         } else {
             throw new AppException(ErrorCode.SERVICE_PACKAGE_NOT_FOUND);
         }
+    }
+
+    private ServicePackageResponse getServicePackageResponse(ServicePackage sp, ServiceProvider provider) {
+        ServiceProviderResponse providerResponse = (provider == null) ? null :
+                ServiceProviderResponse.builder()
+                        .id(provider.getId().toHexString())
+                        .name(provider.getName())
+                        .contactEmail(provider.getContactEmail())
+                        .phoneNumber(provider.getPhoneNumber())
+                        .address(provider.getAddress())
+                        .website(provider.getWebsite())
+                        .build();
+
+        return ServicePackageResponse.builder()
+                .id(sp.getId().toHexString())
+                .providerId(providerResponse)
+                .name(sp.getName())
+                .description(sp.getDescription())
+                .price(sp.getPrice())
+                .currency(sp.getCurrency())
+                .durationMonths(sp.getDurationMonths())
+                .discountPercent(sp.getDiscountPercent())
+                .features(sp.getFeatures())
+                .image(sp.getImage())
+                .status(sp.getStatus())
+                .build();
     }
 }

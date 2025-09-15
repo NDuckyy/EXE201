@@ -1,7 +1,10 @@
 package exe.exe201be.pojo;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
+import org.bson.types.ObjectId;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.LastModifiedDate;
@@ -21,12 +24,13 @@ import java.util.Date;
 public class Task {
 
     @Id
-    private String id;
+    @JsonSerialize(using = ToStringSerializer.class)
+    private ObjectId id;
 
     @Schema(description = "Unique identifier of the project", example = "507f1f77bcf86cd799439013")
     @Field("project_id")
     @Indexed
-    private String projectId;
+    private ObjectId projectId;
 
     @Schema(description = "Name of the task", example = "Thiết kế UI trang chủ")
     @Indexed

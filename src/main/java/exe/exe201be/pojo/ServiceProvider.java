@@ -1,8 +1,11 @@
 package exe.exe201be.pojo;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import exe.exe201be.pojo.type.Status;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
+import org.bson.types.ObjectId;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.LastModifiedDate;
@@ -22,7 +25,8 @@ import java.util.Date;
 public class ServiceProvider {
 
     @Id
-    private String id;
+    @JsonSerialize(using = ToStringSerializer.class)
+    private ObjectId id;
 
     @Schema(description = "Name of the service provider", example = "Shine Solutions")
     @Indexed
