@@ -31,20 +31,24 @@ public class JwtTokenGenerator {
 
     private static final Duration DEFAULT_TTL = Duration.ofMinutes(15);
 
-    /** Generate token mặc định 15 phút */
-    public String generate(String userId, String email, String role) {
-        return generate(userId, email, role, DEFAULT_TTL);
+    /**
+     * Generate token mặc định 15 phút
+     */
+    public String generate(String userId, String email, List<String> authorities) {
+        return generate(userId, email, authorities, DEFAULT_TTL);
     }
 
-    /** Generate token với TTL tuỳ chọn */
-    public String generate(String userId, String email, String role, Duration ttl) {
+    /**
+     * Generate token với TTL tuỳ chọn
+     */
+    public String generate(String userId, String email, List<String> authorities, Duration ttl) {
         try {
             Instant now = Instant.now();
             // Claims
             JWTClaimsSet claims = new JWTClaimsSet.Builder()
                     .subject(userId)                          // sub
                     .claim("email", email)                    // email
-                    .claim("role", role)            // ["ADMIN"]...
+                    .claim("authorities", authorities)            // ["ADMIN"]...
                     .issueTime(Date.from(now))                // iat
                     .notBeforeTime(Date.from(now))            // nbf
                     .expirationTime(Date.from(now.plus(ttl))) // exp

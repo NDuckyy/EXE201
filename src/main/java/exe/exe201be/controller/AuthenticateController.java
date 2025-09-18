@@ -8,6 +8,7 @@ import exe.exe201be.pojo.Role;
 import exe.exe201be.pojo.User;
 import exe.exe201be.pojo.UserGlobalRole;
 import exe.exe201be.service.Authenticate.AuthenticateService;
+import exe.exe201be.service.Authority.AuthorityService;
 import exe.exe201be.service.Role.GlobalRoleService;
 import exe.exe201be.service.Role.RoleService;
 import exe.exe201be.service.UserService.UserService;
@@ -29,6 +30,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+
 @Slf4j
 @RestController
 @RequestMapping("/api/v1/auth")
@@ -39,10 +42,7 @@ public class AuthenticateController {
     UserService userService;
 
     @Autowired
-    GlobalRoleService globalRoleService;
-
-    @Autowired
-    RoleService roleService;
+    AuthorityService authorityService;
 
     @Autowired
     JwtTokenGenerator jwtUtilsHelper;
@@ -73,17 +73,20 @@ public class AuthenticateController {
         boolean ok = authenticateService.checkLogin(loginRequest);
         if (ok) {
             User user = userService.getUserByEmail(loginRequest.getEmail());
-            UserGlobalRole userGlobalRole = globalRoleService.getUserGlobalRoleByUserId(user.getId());
-            Role role = roleService.getRoleById(userGlobalRole.getRoleId());
 
-            String token = jwtUtilsHelper.generate(user.getId().toHexString(), user.getEmail(), role.getKey());
+            // 🔹 Gọi service để lấy tất cả authorities
+            List<String> authorities = authorityService.getAuthoritiesForUser(user.getId().toHexString());
+
+            // 🔹 Generate JWT với authorities
+            String token = jwtUtilsHelper.generate(user.getId().toHexString(), user.getEmail(), authorities);
+
+            // 🔹 Set cookie
             Cookie cookie = new Cookie("jwt", token);
-            cookie.setHttpOnly(true);         // không cho JS truy cập
-            cookie.setSecure(true);           // chỉ gửi qua HTTPS
-            cookie.setPath("/");              // phạm vi cookie
-            cookie.setMaxAge(60 * 60);        // thời gian sống (1h)
+            cookie.setHttpOnly(true);
+            cookie.setSecure(true);
+            cookie.setPath("/");
+            cookie.setMaxAge(60 * 60); // 1h
 
-            // Gắn cookie vào response
             httpResponse.addCookie(cookie);
 
             response.setMessage("Login Successfully");
@@ -92,64 +95,62 @@ public class AuthenticateController {
             response.setMessage("Invalid username or password");
             response.setData(null);
         }
+
         return response;
     }
 
 
-//    @PostMapping(value = "/register", consumes = "application/json", produces = "application/json")
-//    @Operation(
-//            summary = "User Registration",
-//            description = "Register a new user and return JWT token if successful"
-//    )
-//    @ApiResponses(value = {
-//            @ApiResponse(
-//                    responseCode = "200",
-//                    description = "Register successful",
-//                    content = @Content(mediaType = "application/json",
-//                            schema = @Schema(implementation = String.class))
-//            ),
-//            @ApiResponse(
-//                    responseCode = "400",
-//                    description = "Register failed",
-//                    content = @Content(mediaType = "application/json")
-//            )
-//    })
-//    public ResponseEntity<APIResponse<String>> register(@RequestBody @Valid RegisterRequest registerRequest,
-//                                                        BindingResult bindingResult) {
-//        APIResponse<String> response = new APIResponse<>();
-//
-//
-//
-//        try {
-//            // 2) Chuẩn hoá email
-//            String email = safeTrimToNull(registerRequest.getEmail());
-//            if (email == null) {
-//                response.setCode(ErrorCode.VALIDATION_FAILED.getCode());
-//                response.setMessage("Register failed: Email không hợp lệ");
-//                return ResponseEntity.badRequest().body(response);
-//            }
-//            registerRequest.setEmail(email.toLowerCase());
-//
-//            boolean created = userService.createUser(registerRequest);
-//            if (created) {
-//                String token = jwtUtilsHelper.generate(registerRequest.getEmail());
-//                response.setMessage("Register Successfully");
-//                response.setData(token);
-//                return ResponseEntity.ok(response);
-//            } else {
-//                response.setCode(ErrorCode.USER_EXISTS.getCode());
-//                response.setMessage("Register failed: User already exists");
-//                response.setData(null);
-//                return ResponseEntity.badRequest().body(response);
-//            }
-//        } catch (Exception e) {
-//            log.error("Register error", e);
-//            response.setCode(ErrorCode.SERVICE_PROVIDER_NOT_FOUND.getCode());
-//            response.setMessage("Register failed: " + e.getMessage());
-//            response.setData(null);
-//            return ResponseEntity.badRequest().body(response);
-//        }
-//    }
+    @PostMapping(value = "/register", consumes = "application/json", produces = "application/json")
+    @Operation(
+            summary = "User Registration",
+            description = "Register a new user and return JWT token if successful"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Register successful",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = String.class))
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Register failed",
+                    content = @Content(mediaType = "application/json")
+            )
+    })
+    public ResponseEntity<APIResponse<String>> register(@RequestBody @Valid RegisterRequest registerRequest,
+                                                        BindingResult bindingResult) {
+        APIResponse<String> response = new APIResponse<>();
+
+
+        try {
+
+            String email = safeTrimToNull(registerRequest.getEmail());
+            if (email == null) {
+                response.setCode(ErrorCode.VALIDATION_FAILED.getCode());
+                response.setMessage("Register failed: Email không hợp lệ");
+                return ResponseEntity.badRequest().body(response);
+            }
+            registerRequest.setEmail(email.toLowerCase());
+
+            boolean created = userService.createUser(registerRequest);
+            if (created) {
+                response.setMessage("Register Successfully");
+                return ResponseEntity.ok(response);
+            } else {
+                response.setCode(ErrorCode.USER_EXISTS.getCode());
+                response.setMessage("Register failed: User already exists");
+                response.setData(null);
+                return ResponseEntity.badRequest().body(response);
+            }
+        } catch (Exception e) {
+            log.error("Register error", e);
+            response.setCode(ErrorCode.SERVICE_PROVIDER_NOT_FOUND.getCode());
+            response.setMessage("Register failed: " + e.getMessage());
+            response.setData(null);
+            return ResponseEntity.badRequest().body(response);
+        }
+    }
 
     private String safeTrimToNull(String s) {
         if (s == null) return null;

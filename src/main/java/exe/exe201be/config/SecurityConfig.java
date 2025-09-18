@@ -6,22 +6,28 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
+import org.springframework.security.authorization.AuthorizationDecision;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.access.intercept.RequestAuthorizationContext;
+import org.springframework.security.web.server.authorization.AuthorizationContext;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.function.Supplier;
 
 @Configuration
 @EnableWebSecurity
@@ -55,21 +61,25 @@ public class SecurityConfig {
                                 "/api/v1/auth/login").permitAll()
 
                         .requestMatchers(HttpMethod.GET,
-                                "/api/users/getAll",
+                                "/api/users/getAllUser").hasAuthority("ADMIN")
+
+                        .requestMatchers(HttpMethod.GET,
                                 "api/service-packages",
                                 "/api/service-packages/*",
                                 "/api/service-providers",
                                 "/api/service-providers/*",
-                                "/api/users/getAllUser",
                                 "/api/users/{id}",
                                 "/api/projects",
                                 "/api/projects/{id}"
-                                ).permitAll()
+                        ).permitAll()
 
                         .requestMatchers(HttpMethod.PATCH,
-                                "/api/service-packages/{id}",
                                 "/api/service-providers/{id}"
-                                ).permitAll()
+                        ).hasAuthority("ADMIN")
+
+                        .requestMatchers(HttpMethod.PATCH,
+                                "/api/service-packages/{id}"
+                        ).hasAuthority("PROVIDER")
 
                         .requestMatchers(HttpMethod.DELETE,
                                 "/api/users/{id}").permitAll()
@@ -77,23 +87,63 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.PUT,
                                 "/api/users/{id}").permitAll()
 
+                        .requestMatchers("/api/{projectId}/tasks").access(this::isProjectMemberOrLeader)
+
                         .anyRequest().authenticated()
                 )
                 .oauth2ResourceServer(oauth2 -> oauth2
                         // đọc token từ cookie "access_token" hoặc header Authorization
                         .bearerTokenResolver(new CookieOrHeaderBearerTokenResolver("access_token"))
-                        .jwt(jwt -> jwt.jwtAuthenticationConverter(this::jwtAuthConverter))
+                        .jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter()))
                 )
                 .build();
     }
 
-    private AbstractAuthenticationToken jwtAuthConverter(Jwt jwt) {
-        // Nếu bạn dùng scope/permissions trong token, map ra GrantedAuthority ở đây
-        JwtGrantedAuthoritiesConverter conv = new JwtGrantedAuthoritiesConverter();
-        conv.setAuthorityPrefix("SCOPE_");
-        conv.setAuthoritiesClaimName("scope"); // đổi sang "permissions" nếu dùng Auth0 RBAC permissions
-        Collection<GrantedAuthority> authorities = conv.convert(jwt);
-        return new JwtAuthenticationToken(jwt, authorities);
+    private AuthorizationDecision isProjectMemberOrLeader(Supplier<Authentication> authentication, RequestAuthorizationContext context) {
+        String projectId = context.getVariables().get("projectId").toString();
+
+        boolean granted = authentication.get().getAuthorities().stream().anyMatch(a ->
+                a.getAuthority().equals("PROJECT_" + projectId + "_PROJECT_MEMBER") ||
+                        a.getAuthority().equals("PROJECT_" + projectId + "_PROJECT_LEADER")
+        );
+
+        return new AuthorizationDecision(granted);
+    }
+
+    private AuthorizationDecision isProjectLeader(Supplier<Authentication> authentication, RequestAuthorizationContext context) {
+        String projectId = context.getVariables().get("projectId").toString();
+
+        boolean granted = authentication.get().getAuthorities().stream().anyMatch(a ->
+                a.getAuthority().equals("PROJECT_" + projectId + "_PROJECT_LEADER")
+        );
+
+        return new AuthorizationDecision(granted);
+    }
+
+
+    private AuthorizationDecision hasTaskRole(Supplier<Authentication> authentication, RequestAuthorizationContext context) {
+        String projectId = context.getVariables().get("projectId").toString();
+        String taskId = context.getVariables().get("taskId").toString();
+
+        boolean granted = authentication.get().getAuthorities().stream().anyMatch(a ->
+                a.getAuthority().equals("PROJECT_" + projectId + "_TASK_" + taskId + "_TASK_ASSIGNEE") ||
+                        a.getAuthority().equals("PROJECT_" + projectId + "_TASK_" + taskId + "_TASK_OWNER")
+        );
+
+        return new AuthorizationDecision(granted);
+    }
+
+
+    @Bean
+    public JwtAuthenticationConverter jwtAuthenticationConverter() {
+        JwtGrantedAuthoritiesConverter grantedAuthoritiesConverter = new JwtGrantedAuthoritiesConverter();
+        grantedAuthoritiesConverter.setAuthoritiesClaimName("authorities");
+        grantedAuthoritiesConverter.setAuthorityPrefix("");
+
+        JwtAuthenticationConverter jwtAuthConverter = new JwtAuthenticationConverter();
+        jwtAuthConverter.setJwtGrantedAuthoritiesConverter(grantedAuthoritiesConverter);
+
+        return jwtAuthConverter;
     }
 
     @Bean
@@ -101,7 +151,7 @@ public class SecurityConfig {
         CorsConfiguration cfg = new CorsConfiguration();
         // Khuyến nghị: chỉ định origin FE thật thay vì "*"
         cfg.setAllowedOriginPatterns(List.of("*"));
-        cfg.setAllowedMethods(List.of("GET","POST","PUT","PATCH","DELETE","OPTIONS"));
+        cfg.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         cfg.setAllowedHeaders(List.of("*"));
         cfg.setAllowCredentials(true); // cần true nếu gửi cookie
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

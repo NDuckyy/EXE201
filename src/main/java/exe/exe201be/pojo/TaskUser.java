@@ -39,6 +39,11 @@ public class TaskUser {
     @Indexed
     private ObjectId roleId;
 
+    @Schema(description = "Unique identifier of the project", example = "507f1f77bcf86cd799439031")
+    @Field("project_id")
+    @Indexed
+    private ObjectId projectId;
+
     @Schema(description = "Date when the user was assigned to the task")
     @Field("assigned_at")
     @Indexed
