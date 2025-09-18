@@ -96,60 +96,58 @@ public class AuthenticateController {
     }
 
 
-//    @PostMapping(value = "/register", consumes = "application/json", produces = "application/json")
-//    @Operation(
-//            summary = "User Registration",
-//            description = "Register a new user and return JWT token if successful"
-//    )
-//    @ApiResponses(value = {
-//            @ApiResponse(
-//                    responseCode = "200",
-//                    description = "Register successful",
-//                    content = @Content(mediaType = "application/json",
-//                            schema = @Schema(implementation = String.class))
-//            ),
-//            @ApiResponse(
-//                    responseCode = "400",
-//                    description = "Register failed",
-//                    content = @Content(mediaType = "application/json")
-//            )
-//    })
-//    public ResponseEntity<APIResponse<String>> register(@RequestBody @Valid RegisterRequest registerRequest,
-//                                                        BindingResult bindingResult) {
-//        APIResponse<String> response = new APIResponse<>();
-//
-//
-//
-//        try {
-//            // 2) Chuẩn hoá email
-//            String email = safeTrimToNull(registerRequest.getEmail());
-//            if (email == null) {
-//                response.setCode(ErrorCode.VALIDATION_FAILED.getCode());
-//                response.setMessage("Register failed: Email không hợp lệ");
-//                return ResponseEntity.badRequest().body(response);
-//            }
-//            registerRequest.setEmail(email.toLowerCase());
-//
-//            boolean created = userService.createUser(registerRequest);
-//            if (created) {
-//                String token = jwtUtilsHelper.generate(registerRequest.getEmail());
-//                response.setMessage("Register Successfully");
-//                response.setData(token);
-//                return ResponseEntity.ok(response);
-//            } else {
-//                response.setCode(ErrorCode.USER_EXISTS.getCode());
-//                response.setMessage("Register failed: User already exists");
-//                response.setData(null);
-//                return ResponseEntity.badRequest().body(response);
-//            }
-//        } catch (Exception e) {
-//            log.error("Register error", e);
-//            response.setCode(ErrorCode.SERVICE_PROVIDER_NOT_FOUND.getCode());
-//            response.setMessage("Register failed: " + e.getMessage());
-//            response.setData(null);
-//            return ResponseEntity.badRequest().body(response);
-//        }
-//    }
+    @PostMapping(value = "/register", consumes = "application/json", produces = "application/json")
+    @Operation(
+            summary = "User Registration",
+            description = "Register a new user and return JWT token if successful"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Register successful",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = String.class))
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Register failed",
+                    content = @Content(mediaType = "application/json")
+            )
+    })
+    public ResponseEntity<APIResponse<String>> register(@RequestBody @Valid RegisterRequest registerRequest,
+                                                        BindingResult bindingResult) {
+        APIResponse<String> response = new APIResponse<>();
+
+
+
+        try {
+
+            String email = safeTrimToNull(registerRequest.getEmail());
+            if (email == null) {
+                response.setCode(ErrorCode.VALIDATION_FAILED.getCode());
+                response.setMessage("Register failed: Email không hợp lệ");
+                return ResponseEntity.badRequest().body(response);
+            }
+            registerRequest.setEmail(email.toLowerCase());
+
+            boolean created = userService.createUser(registerRequest);
+            if (created) {
+                response.setMessage("Register Successfully");
+                return ResponseEntity.ok(response);
+            } else {
+                response.setCode(ErrorCode.USER_EXISTS.getCode());
+                response.setMessage("Register failed: User already exists");
+                response.setData(null);
+                return ResponseEntity.badRequest().body(response);
+            }
+        } catch (Exception e) {
+            log.error("Register error", e);
+            response.setCode(ErrorCode.SERVICE_PROVIDER_NOT_FOUND.getCode());
+            response.setMessage("Register failed: " + e.getMessage());
+            response.setData(null);
+            return ResponseEntity.badRequest().body(response);
+        }
+    }
 
     private String safeTrimToNull(String s) {
         if (s == null) return null;
