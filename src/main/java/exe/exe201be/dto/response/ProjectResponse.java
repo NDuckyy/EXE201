@@ -1,5 +1,6 @@
 package exe.exe201be.dto.response;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import exe.exe201be.pojo.User;
 import exe.exe201be.pojo.type.Status;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -29,9 +30,11 @@ public class ProjectResponse {
     private Status status;
 
     @Schema(description = "Start date of the project", example = "2023-01-01")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yy HH:mm:ss", timezone = "UTC")
     private Date startDate;
 
     @Schema(description = "End date of the project", example = "2023-12-31")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yy HH:mm:ss", timezone = "UTC")
     private Date endDate;
 
     @Schema(description = "Size of the project team", example = "10")
