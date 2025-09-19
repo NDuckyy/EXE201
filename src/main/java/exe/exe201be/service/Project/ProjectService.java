@@ -1,5 +1,6 @@
 package exe.exe201be.service.Project;
 
+import exe.exe201be.dto.request.ChangeStatusRequest;
 import exe.exe201be.dto.response.ProjectResponse;
 import exe.exe201be.pojo.Project;
 
@@ -10,5 +11,5 @@ public interface ProjectService {
     ProjectResponse getProjectById(String id);
     ProjectResponse createProject(Project project);
     ProjectResponse updateProject(String id, Project project);
-    void changeStatusProject(String id);
+    void changeStatusProject(String id, ChangeStatusRequest status);
 }

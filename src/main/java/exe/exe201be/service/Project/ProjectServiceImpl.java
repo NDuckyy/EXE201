@@ -1,5 +1,6 @@
 package exe.exe201be.service.Project;
 
+import exe.exe201be.dto.request.ChangeStatusRequest;
 import exe.exe201be.dto.response.ProjectResponse;
 import exe.exe201be.dto.response.UserResponse;
 import exe.exe201be.exception.AppException;
@@ -100,19 +101,14 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
-    public void changeStatusProject(String id) {
+    public void changeStatusProject(String id, ChangeStatusRequest status) {
         ObjectId objectId = new ObjectId(id);
         Project project = projectRepository.findById(objectId).orElse(null);
         if (project == null) {
             throw new AppException(ErrorCode.PROJECT_NOT_FOUND);
         } else {
-            if (project.getStatus() == Status.ACTIVE) {
-                project.setStatus(Status.INACTIVE);
-                projectRepository.save(project);
-            } else {
-                project.setStatus(Status.ACTIVE);
-                projectRepository.save(project);
-            }
+            project.setStatus(status.getStatus());
+            projectRepository.save(project);
         }
     }
 

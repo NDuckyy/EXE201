@@ -1,5 +1,6 @@
 package exe.exe201be.controller;
 
+import exe.exe201be.dto.request.ChangeStatusRequest;
 import exe.exe201be.dto.response.APIResponse;
 import exe.exe201be.dto.response.ProjectResponse;
 import exe.exe201be.pojo.Project;
@@ -67,9 +68,9 @@ public class ProjectController {
                             schema = @Schema(implementation = Project.class))
             )
     })
-    public APIResponse<?> changeStatusProject(@PathVariable String id) {
+    public APIResponse<?> changeStatusProject(@PathVariable String id, @RequestBody ChangeStatusRequest status) {
         APIResponse<?> response = new APIResponse<>();
-        projectService.changeStatusProject(id);
+        projectService.changeStatusProject(id, status);
         response.setMessage("Change status project success");
         return response;
     }

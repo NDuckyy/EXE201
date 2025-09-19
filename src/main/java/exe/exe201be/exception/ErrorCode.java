@@ -19,6 +19,7 @@ public enum ErrorCode {
     SERVICE_PROVIDER_PHONE_NUMBER_ALREADY_EXISTS(409, "Service provider phone number already exists"),
     ROLE_NOT_FOUND(404, "Role not found"),
     USER_GLOBAL_NOT_FOUND(404, "User global not found"),
+    TASK_NOT_FOUND(404, "Task not found"),
     ;
     ErrorCode(int code, String message) {
         this.code = code;
