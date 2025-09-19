@@ -87,6 +87,9 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.PUT,
                                 "/api/users/{id}").permitAll()
 
+                        .requestMatchers(HttpMethod.POST,
+                                "/api/{projectId}/tasks").access(this::isProjectLeader)
+
                         .requestMatchers("/api/{projectId}/tasks").access(this::isProjectMemberOrLeader)
 
                         .anyRequest().authenticated()

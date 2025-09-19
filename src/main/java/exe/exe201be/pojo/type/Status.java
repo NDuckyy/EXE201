@@ -10,7 +10,12 @@ public enum Status {
     TO_DO("To Do"),
     IN_PROGRESS("In Progress"),
     DONE("Done"),
-    CANCELLED("Cancelled");
+    CANCELLED("Cancelled"),
+    HIGH("High"),
+    MEDIUM("Medium"),
+    LOW("Low"),
+    EMERGENCY("Emergency")
+    ;
 
     private final String value;
     Status(String value) {

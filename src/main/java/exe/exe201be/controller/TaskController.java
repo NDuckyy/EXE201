@@ -1,7 +1,9 @@
 package exe.exe201be.controller;
 
 import exe.exe201be.dto.request.ChangeStatusRequest;
+import exe.exe201be.dto.request.CreateTaskRequest;
 import exe.exe201be.dto.response.APIResponse;
+import exe.exe201be.dto.response.TaskResponse;
 import exe.exe201be.pojo.Task;
 import exe.exe201be.service.Task.TaskService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -11,6 +13,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -33,10 +37,10 @@ public class TaskController {
                     )
             )
     })
-    public APIResponse<List<Task>> getAllTasksByProjectId(@PathVariable("projectId") String projectId) {
-        APIResponse<List<Task>> response = new APIResponse<>();
+    public APIResponse<List<TaskResponse>> getAllTasksByProjectId(@PathVariable("projectId") String projectId) {
+        APIResponse<List<TaskResponse>> response = new APIResponse<>();
         ObjectId id = new ObjectId(projectId);
-        List<Task> tasks = taskService.getAllTasksByProjectId(id);
+        List<TaskResponse> tasks = taskService.getAllTasksByProjectId(id);
         if (tasks != null) {
             response.setMessage("Tasks retrieved successfully");
             response.setData(tasks);
@@ -65,6 +69,31 @@ public class TaskController {
         ObjectId id = new ObjectId(taskId);
         taskService.changeTaskStatus(id, status);
         response.setMessage("Task status updated successfully");
+        return response;
+    }
+
+    @PostMapping
+    @Operation(summary = "Create a new Task", description = "Create a new task within a specific project")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Task created successfully",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = Task.class)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Invalid input data"
+            )
+    })
+    public APIResponse<Task> createTask(@PathVariable("projectId") String projectId, @RequestBody CreateTaskRequest task, @AuthenticationPrincipal Jwt jwt) {
+        ObjectId uId = new ObjectId(jwt.getSubject());
+        ObjectId pId = new ObjectId(projectId);
+        APIResponse<Task> response = new APIResponse<>();
+        taskService.createTask(task, pId, uId);
+        response.setMessage("Task created successfully");
         return response;
     }
 }

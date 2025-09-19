@@ -47,7 +47,7 @@ public class Task {
 
     @Schema(description = "Priority of the task", example = "high")
     @Indexed
-    private String priority;
+    private Status priority;
 
     @Schema(description = "Due date of the task")
     @Field("due_date")
@@ -57,7 +57,7 @@ public class Task {
     @Schema(description = "User who created the task", example = "507f1f77bcf86cd799439011")
     @Field("created_by")
     @Indexed
-    private String createdBy;
+    private ObjectId createdBy;
 
     @Schema(description = "Timestamp when the task was created")
     @Field("created_at")
