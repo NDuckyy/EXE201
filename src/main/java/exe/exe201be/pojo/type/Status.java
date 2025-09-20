@@ -6,15 +6,21 @@ import com.fasterxml.jackson.annotation.JsonValue;
 public enum Status {
     ACTIVE("active"),
     INACTIVE("inactive"),
+
     COMPLETED("completed"),
     TO_DO("To Do"),
     IN_PROGRESS("In Progress"),
     DONE("Done"),
     CANCELLED("Cancelled"),
+
     HIGH("High"),
     MEDIUM("Medium"),
     LOW("Low"),
-    EMERGENCY("Emergency")
+    EMERGENCY("Emergency"),
+
+    PENDING("Pending"),
+    PAID("Paid"),
+    FAILED("Failed")
     ;
 
     private final String value;

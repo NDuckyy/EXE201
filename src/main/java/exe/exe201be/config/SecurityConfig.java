@@ -82,15 +82,20 @@ public class SecurityConfig {
                         ).hasAuthority("PROVIDER")
 
                         .requestMatchers(HttpMethod.DELETE,
-                                "/api/users/{id}").permitAll()
+                                "/api/users/{id}").hasAuthority("ADMIN")
 
                         .requestMatchers(HttpMethod.PUT,
-                                "/api/users/{id}").permitAll()
+                                "/api/users/{id}").hasAnyAuthority("USER", "PROVIDER")
 
                         .requestMatchers(HttpMethod.POST,
                                 "/api/{projectId}/tasks").access(this::isProjectLeader)
 
-                        .requestMatchers("/api/{projectId}/tasks").access(this::isProjectMemberOrLeader)
+                        .requestMatchers(HttpMethod.GET,
+                                "/api/{projectId}/tasks",
+                                "/api/{projectId}/tasks/{taskId}").access(this::isProjectMemberOrLeader)
+
+                        .requestMatchers(HttpMethod.GET,
+                                "/api/orders").hasAnyAuthority("USER", "PROVIDER", "ADMIN")
 
                         .anyRequest().authenticated()
                 )

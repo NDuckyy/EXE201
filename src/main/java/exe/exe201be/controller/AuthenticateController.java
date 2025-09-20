@@ -81,11 +81,11 @@ public class AuthenticateController {
             String token = jwtUtilsHelper.generate(user.getId().toHexString(), user.getEmail(), authorities);
 
             // 🔹 Set cookie
-            Cookie cookie = new Cookie("jwt", token);
+            Cookie cookie = new Cookie("access_token", token);
             cookie.setHttpOnly(true);
             cookie.setSecure(true);
             cookie.setPath("/");
-            cookie.setMaxAge(60 * 60); // 1h
+            cookie.setMaxAge(60 * 60 * 12); // 1h
 
             httpResponse.addCookie(cookie);
 

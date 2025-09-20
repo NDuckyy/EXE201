@@ -96,4 +96,31 @@ public class TaskController {
         response.setMessage("Task created successfully");
         return response;
     }
+
+    @GetMapping("/{taskId}")
+    @Operation(summary = "Get Task by ID", description = "Retrieve a specific task by its ID within a project")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Task retrieved successfully",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = Task.class)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Task not found"
+            )
+    })
+    public APIResponse<TaskResponse> getTaskById(@PathVariable("taskId") String taskId, @PathVariable("projectId") String projectId) {
+        APIResponse<TaskResponse> response = new APIResponse<>();
+        ObjectId id = new ObjectId(taskId);
+        TaskResponse task = taskService.getTaskById(id);
+        if (task != null) {
+            response.setMessage("Task retrieved successfully");
+            response.setData(task);
+        }
+        return response;
+    }
 }
