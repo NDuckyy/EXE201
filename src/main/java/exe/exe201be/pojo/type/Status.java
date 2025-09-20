@@ -7,6 +7,7 @@ public enum Status {
     ACTIVE("active"),
     INACTIVE("inactive"),
     COMPLETED("completed"),
+    REVIEW("Review"),
     TO_DO("To Do"),
     IN_PROGRESS("In Progress"),
     DONE("Done"),
