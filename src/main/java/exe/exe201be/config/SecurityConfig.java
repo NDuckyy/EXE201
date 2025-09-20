@@ -1,5 +1,6 @@
 package exe.exe201be.config;
 
+import exe.exe201be.exception.CustomAuthHandlers;
 import exe.exe201be.utils.CookieOrHeaderBearerTokenResolver;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -47,7 +48,7 @@ public class SecurityConfig {
 
     @Bean
     @Order(2)
-    SecurityFilterChain apiChain(HttpSecurity http) throws Exception {
+    SecurityFilterChain apiChain(HttpSecurity http, CustomAuthHandlers handlers) throws Exception {
         return http
                 .securityMatcher("/api/**") // chỉ áp cho API
                 .csrf(csrf -> csrf.disable())
@@ -103,6 +104,10 @@ public class SecurityConfig {
                         // đọc token từ cookie "access_token" hoặc header Authorization
                         .bearerTokenResolver(new CookieOrHeaderBearerTokenResolver("access_token"))
                         .jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter()))
+                )
+                .exceptionHandling(e -> e
+                        .authenticationEntryPoint(handlers.authenticationEntryPoint()) // 401
+                        .accessDeniedHandler(handlers.accessDeniedHandler())           // 403
                 )
                 .build();
     }
