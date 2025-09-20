@@ -54,29 +54,7 @@ public class TaskServiceImpl implements TaskService {
         return tasks.stream().map(
                 t -> {
                     User user = usersById.get(t.getCreatedBy());
-                    UserResponse userResponse = user != null ? UserResponse.builder()
-                            .id(user.getId().toHexString())
-                            .fullName(user.getFullName())
-                            .email(user.getEmail())
-                            .phone(user.getPhone())
-                            .address(user.getAddress())
-                            .build() : null;
-                    ProjectResponse projectResponse = project != null ? ProjectResponse.builder()
-                            .id(project.getId().toHexString())
-                            .name(project.getName())
-                            .description(project.getDescription())
-                            .status(project.getStatus())
-                            .build() : null;
-                    return TaskResponse.builder()
-                            .id(t.getId().toHexString())
-                            .name(t.getName())
-                            .description(t.getDescription())
-                            .projectId(projectResponse)
-                            .status(t.getStatus())
-                            .priority(t.getPriority())
-                            .dueDate(t.getDueDate())
-                            .createdBy(userResponse)
-                            .build();
+                    return getTaskResponse(t, user, project);
                 }).collect(Collectors.toList());
     }
 
@@ -104,5 +82,43 @@ public class TaskServiceImpl implements TaskService {
                 .createdBy(userId)
                 .build();
         return taskRepository.save(newTask);
+    }
+
+    @Override
+    public TaskResponse getTaskById(ObjectId taskId) {
+        Task t = taskRepository.findById(taskId).orElse(null);
+        if (t == null)
+            throw new AppException(ErrorCode.TASK_NOT_FOUND);
+
+        User user = userRepository.findById(t.getCreatedBy()).orElse(null);
+        Project project = projectRepository.findById(t.getProjectId()).orElse(null);
+
+        return getTaskResponse(t, user, project);
+    }
+
+    private TaskResponse getTaskResponse(Task t, User user, Project project) {
+        UserResponse userResponse = user != null ? UserResponse.builder()
+                .id(user.getId().toHexString())
+                .fullName(user.getFullName())
+                .email(user.getEmail())
+                .phone(user.getPhone())
+                .address(user.getAddress())
+                .build() : null;
+        ProjectResponse projectResponse = project != null ? ProjectResponse.builder()
+                .id(project.getId().toHexString())
+                .name(project.getName())
+                .description(project.getDescription())
+                .status(project.getStatus())
+                .build() : null;
+        return TaskResponse.builder()
+                .id(t.getId().toHexString())
+                .name(t.getName())
+                .description(t.getDescription())
+                .projectId(projectResponse)
+                .status(t.getStatus())
+                .priority(t.getPriority())
+                .dueDate(t.getDueDate())
+                .createdBy(userResponse)
+                .build();
     }
 }

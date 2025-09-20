@@ -13,4 +13,5 @@ public interface TaskService {
     List<TaskResponse> getAllTasksByProjectId(ObjectId projectId);
     void changeTaskStatus(ObjectId taskId, ChangeStatusRequest status);
     Task createTask(CreateTaskRequest task, ObjectId projectId, ObjectId userId);
+    TaskResponse getTaskById(ObjectId taskId);
 }

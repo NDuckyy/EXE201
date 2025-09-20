@@ -20,6 +20,8 @@ public enum ErrorCode {
     ROLE_NOT_FOUND(404, "Role not found"),
     USER_GLOBAL_NOT_FOUND(404, "User global not found"),
     TASK_NOT_FOUND(404, "Task not found"),
+    ORDER_NOT_FOUND(404, "Order not found"),
+    USER_NOT_FOUND(404, "User not found"),
     ;
     ErrorCode(int code, String message) {
         this.code = code;
