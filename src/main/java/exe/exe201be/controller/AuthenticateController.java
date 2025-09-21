@@ -85,7 +85,7 @@ public class AuthenticateController {
             cookie.setHttpOnly(true);
             cookie.setSecure(true);
             cookie.setPath("/");
-            cookie.setMaxAge(60 * 60 * 12); // 1h
+            cookie.setMaxAge(60 * 60 * 24 * 30); // 30 ngày
 
             httpResponse.addCookie(cookie);
 
