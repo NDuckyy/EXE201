@@ -91,12 +91,18 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST,
                                 "/api/{projectId}/tasks").access(this::isProjectLeader)
 
+                        .requestMatchers(HttpMethod.POST,
+                                "/api/projects").hasAuthority("USER")
+
                         .requestMatchers(HttpMethod.GET,
                                 "/api/{projectId}/tasks",
                                 "/api/{projectId}/tasks/{taskId}").access(this::isProjectMemberOrLeader)
 
                         .requestMatchers(HttpMethod.GET,
                                 "/api/orders").hasAnyAuthority("USER", "PROVIDER", "ADMIN")
+
+                        .requestMatchers(HttpMethod.GET,
+                                "/api/dashboard/member-data").hasAuthority("USER")
 
                         .anyRequest().authenticated()
                 )

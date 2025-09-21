@@ -11,6 +11,5 @@ import java.util.List;
 
 @Repository
 public interface ProjectRepository extends MongoRepository<Project, ObjectId> {
-    long countByManagerIdAndStatus(ObjectId managerId, Status status);
 
 }

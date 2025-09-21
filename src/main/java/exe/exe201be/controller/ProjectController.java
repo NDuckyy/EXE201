@@ -1,6 +1,7 @@
 package exe.exe201be.controller;
 
 import exe.exe201be.dto.request.ChangeStatusRequest;
+import exe.exe201be.dto.request.CreateProjectRequest;
 import exe.exe201be.dto.response.APIResponse;
 import exe.exe201be.dto.response.ProjectResponse;
 import exe.exe201be.pojo.Project;
@@ -10,7 +11,10 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -72,6 +76,25 @@ public class ProjectController {
         APIResponse<?> response = new APIResponse<>();
         projectService.changeStatusProject(id, status);
         response.setMessage("Change status project success");
+        return response;
+    }
+
+    @PostMapping
+    @Operation(summary = "Create Project", description = "Create a new project")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Successful operation",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = APIResponse.class))
+            )
+    })
+    public APIResponse<?> createProject (@RequestBody CreateProjectRequest createProject, @AuthenticationPrincipal Jwt jwt) {
+        APIResponse<?> response = new APIResponse<>();
+        ObjectId id = new ObjectId(jwt.getSubject());
+        projectService.createProject(createProject, id);
+        response.setMessage("Create project success");
         return response;
     }
 }
