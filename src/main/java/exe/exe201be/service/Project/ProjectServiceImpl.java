@@ -1,23 +1,25 @@
 package exe.exe201be.service.Project;
 
 import exe.exe201be.dto.request.ChangeStatusRequest;
+import exe.exe201be.dto.request.CreateProjectRequest;
 import exe.exe201be.dto.response.ProjectResponse;
 import exe.exe201be.dto.response.UserResponse;
 import exe.exe201be.exception.AppException;
 import exe.exe201be.exception.ErrorCode;
 import exe.exe201be.pojo.Project;
+import exe.exe201be.pojo.ProjectUser;
+import exe.exe201be.pojo.Role;
 import exe.exe201be.pojo.User;
 import exe.exe201be.pojo.type.Status;
 import exe.exe201be.repository.ProjectRepository;
+import exe.exe201be.repository.ProjectUserRepository;
+import exe.exe201be.repository.RoleRepository;
 import exe.exe201be.repository.UserRepository;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -28,7 +30,13 @@ public class ProjectServiceImpl implements ProjectService {
     private ProjectRepository projectRepository;
 
     @Autowired
+    private ProjectUserRepository projectUserRepository;
+
+    @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private RoleRepository roleRepository;
 
     @Override
     public List<ProjectResponse> getAllProjects() {
@@ -91,8 +99,30 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
-    public ProjectResponse createProject(Project project) {
-        return null;
+    public void createProject(CreateProjectRequest project, ObjectId userId) {
+        Role role = roleRepository.findByKey("PROJECT_LEADER");
+        if (role == null) {
+            throw new AppException(ErrorCode.ROLE_NOT_FOUND);
+        }
+        Project newProject = Project.builder()
+                .name(project.getName())
+                .description(project.getDescription())
+                .managerId(userId)
+                .status(Status.ACTIVE)
+                .startDate(project.getStartDate())
+                .endDate(project.getEndDate())
+                .teamSize(project.getTeamSize())
+                .progress(0.0)
+                .build();
+        projectRepository.save(newProject);
+        ProjectUser projectUser = ProjectUser.builder()
+                .projectId(newProject.getId())
+                .userId(userId)
+                .roleId(role.getId())
+                .status(Status.ACTIVE)
+                .joinedAt(new Date())
+                .build();
+        projectUserRepository.save(projectUser);
     }
 
     @Override
