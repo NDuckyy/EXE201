@@ -29,7 +29,7 @@ public class JwtTokenGenerator {
         }
     }
 
-    private static final Duration DEFAULT_TTL = Duration.ofHours(2);
+    private static final Duration DEFAULT_TTL = Duration.ofDays(30);
 
     /**
      * Generate token mặc định 15 phút

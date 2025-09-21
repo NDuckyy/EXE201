@@ -14,8 +14,8 @@ import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/images")
-public class ImageController {
+@RequestMapping("/api/")
+public class UploadController {
 
     private final S3Client s3;
 
