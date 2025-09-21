@@ -2,6 +2,7 @@ package exe.exe201be.pojo;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
+import exe.exe201be.pojo.type.Status;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 import org.bson.types.ObjectId;
@@ -51,5 +52,5 @@ public class TaskUser {
 
     @Schema(description = "Status of the assignment", example = "active")
     @Indexed
-    private String status;
+    private Status status;
 }

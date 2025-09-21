@@ -10,4 +10,5 @@ import java.util.List;
 @Repository
 public interface TaskUserRepository extends MongoRepository<TaskUser, ObjectId> {
     List<TaskUser> findByUserId(ObjectId userId);
+    long countByUserId(ObjectId userId);
 }
