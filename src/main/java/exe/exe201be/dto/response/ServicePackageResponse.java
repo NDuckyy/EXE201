@@ -21,6 +21,8 @@ public class ServicePackageResponse {
     private int durationMonths;
     private int discountPercent;
     private List<String> features;
+    private List<String> serviceScope;
+    private List<String> estimatedDelivery;
     private String image;
     private Status status;
 }

@@ -2,6 +2,9 @@ package exe.exe201be.service.Authority;
 
 import exe.exe201be.pojo.*;
 import exe.exe201be.repository.*;
+import exe.exe201be.utils.JwtTokenGenerator;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -22,9 +25,9 @@ public class AuthorityService {
 
     @Autowired
     private UserGlobalRepository userGlobalRepository;
-    @Autowired
-    private ProjectRepository projectRepository;
 
+    @Autowired
+    private JwtTokenGenerator jwtUtilsHelper;
 
     public List<String> getAuthoritiesForUser(String userId) {
         List<String> authorities = new ArrayList<>();
@@ -54,6 +57,20 @@ public class AuthorityService {
         }
 
         return authorities;
+    }
+
+    public String refreshUserToken(User user, HttpServletResponse httpResponse) {
+        List<String> authorities = getAuthoritiesForUser(user.getId().toHexString());
+        String token = jwtUtilsHelper.generate(user.getId().toHexString(), user.getEmail(), authorities);
+
+        Cookie cookie = new Cookie("access_token", token);
+        cookie.setHttpOnly(true);
+        cookie.setSecure(true);
+        cookie.setPath("/");
+        cookie.setMaxAge(60 * 60 * 24 * 30);
+
+        httpResponse.addCookie(cookie);
+        return token;
     }
 }
 

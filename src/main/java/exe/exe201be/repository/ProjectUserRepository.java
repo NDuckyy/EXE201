@@ -8,4 +8,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface ProjectUserRepository extends MongoRepository<ProjectUser, ObjectId> {
     long countByUserId(ObjectId userId);
+
+    ProjectUser findByProjectIdAndUserId(ObjectId projectId, ObjectId userId);
 }

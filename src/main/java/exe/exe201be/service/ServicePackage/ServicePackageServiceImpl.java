@@ -141,6 +141,8 @@ public class ServicePackageServiceImpl implements ServicePackageService {
                 .durationMonths(sp.getDurationMonths())
                 .discountPercent(sp.getDiscountPercent())
                 .features(sp.getFeatures())
+                .serviceScope(sp.getServiceScope())
+                .estimatedDelivery(sp.getEstimatedDelivery())
                 .image(sp.getImage())
                 .status(sp.getStatus())
                 .build();

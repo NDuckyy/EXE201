@@ -1,5 +1,6 @@
 package exe.exe201be.controller;
 
+import exe.exe201be.dto.request.AddMemberRequest;
 import exe.exe201be.dto.request.ChangeStatusRequest;
 import exe.exe201be.dto.request.CreateProjectRequest;
 import exe.exe201be.dto.response.APIResponse;
@@ -11,6 +12,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import jakarta.servlet.http.HttpServletResponse;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -90,11 +92,20 @@ public class ProjectController {
                             schema = @Schema(implementation = APIResponse.class))
             )
     })
-    public APIResponse<?> createProject (@RequestBody CreateProjectRequest createProject, @AuthenticationPrincipal Jwt jwt) {
+    public APIResponse<?> createProject (@RequestBody CreateProjectRequest createProject, @AuthenticationPrincipal Jwt jwt, HttpServletResponse httpServletResponse) {
         APIResponse<?> response = new APIResponse<>();
         ObjectId id = new ObjectId(jwt.getSubject());
-        projectService.createProject(createProject, id);
+        projectService.createProject(createProject, id, httpServletResponse);
         response.setMessage("Create project success");
+        return response;
+    }
+
+    @PostMapping("/{projectId}/members")
+    public APIResponse<?> addMemberToProject(@PathVariable String projectId, @RequestBody AddMemberRequest request, HttpServletResponse httpServletResponse) {
+        APIResponse<?> response = new APIResponse<>();
+        ObjectId pId = new ObjectId(projectId);
+        projectService.addMemberToProject(pId, request.getEmail());
+        response.setMessage("Add member to project success");
         return response;
     }
 }

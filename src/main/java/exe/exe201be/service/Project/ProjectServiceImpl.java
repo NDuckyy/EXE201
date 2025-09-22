@@ -6,15 +6,11 @@ import exe.exe201be.dto.response.ProjectResponse;
 import exe.exe201be.dto.response.UserResponse;
 import exe.exe201be.exception.AppException;
 import exe.exe201be.exception.ErrorCode;
-import exe.exe201be.pojo.Project;
-import exe.exe201be.pojo.ProjectUser;
-import exe.exe201be.pojo.Role;
-import exe.exe201be.pojo.User;
+import exe.exe201be.pojo.*;
 import exe.exe201be.pojo.type.Status;
-import exe.exe201be.repository.ProjectRepository;
-import exe.exe201be.repository.ProjectUserRepository;
-import exe.exe201be.repository.RoleRepository;
-import exe.exe201be.repository.UserRepository;
+import exe.exe201be.repository.*;
+import exe.exe201be.service.Authority.AuthorityService;
+import jakarta.servlet.http.HttpServletResponse;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -37,6 +33,13 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Autowired
     private RoleRepository roleRepository;
+
+    @Autowired
+    private UserProjectRepository userProjectRepository;
+
+    @Autowired
+    private AuthorityService authorityService;
+
 
     @Override
     public List<ProjectResponse> getAllProjects() {
@@ -99,7 +102,7 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
-    public void createProject(CreateProjectRequest project, ObjectId userId) {
+    public void createProject(CreateProjectRequest project, ObjectId userId, HttpServletResponse httpServletResponse) {
         Role role = roleRepository.findByKey("PROJECT_LEADER");
         if (role == null) {
             throw new AppException(ErrorCode.ROLE_NOT_FOUND);
@@ -111,10 +114,11 @@ public class ProjectServiceImpl implements ProjectService {
                 .status(Status.ACTIVE)
                 .startDate(project.getStartDate())
                 .endDate(project.getEndDate())
-                .teamSize(project.getTeamSize())
+                .teamSize(1)
                 .progress(0.0)
                 .build();
         projectRepository.save(newProject);
+
         ProjectUser projectUser = ProjectUser.builder()
                 .projectId(newProject.getId())
                 .userId(userId)
@@ -123,6 +127,20 @@ public class ProjectServiceImpl implements ProjectService {
                 .joinedAt(new Date())
                 .build();
         projectUserRepository.save(projectUser);
+
+        UserProjectRole userProjectRole = UserProjectRole.builder()
+                .userId(userId)
+                .projectId(newProject.getId())
+                .roleId(role.getId())
+                .build();
+        userProjectRepository.save(userProjectRole);
+
+        User user = userRepository.findById(userId).orElse(null);
+        if (user == null) {
+            throw new AppException(ErrorCode.USER_NOT_FOUND);
+        }
+
+        String token = authorityService.refreshUserToken(user , httpServletResponse);
     }
 
     @Override
@@ -140,6 +158,46 @@ public class ProjectServiceImpl implements ProjectService {
             project.setStatus(status.getStatus());
             projectRepository.save(project);
         }
+    }
+
+    @Override
+    public void addMemberToProject(ObjectId projectId, String email) {
+        Project project = projectRepository.findById(projectId).orElse(null);
+        if (project == null) {
+            throw new AppException(ErrorCode.PROJECT_NOT_FOUND);
+        }
+        User user = userRepository.findByEmail(email);
+        if (user == null) {
+            throw new AppException(ErrorCode.USER_NOT_FOUND);
+        }
+        Role role = roleRepository.findByKey("PROJECT_MEMBER");
+        if (role == null) {
+            throw new AppException(ErrorCode.ROLE_NOT_FOUND);
+        }
+        ProjectUser existingProjectUser = projectUserRepository.findByProjectIdAndUserId(projectId, user.getId());
+        if (existingProjectUser != null) {
+            throw new AppException(ErrorCode.USER_ALREADY_IN_PROJECT);
+        }
+
+        project.setTeamSize(project.getTeamSize() + 1);
+        projectRepository.save(project);
+
+        ProjectUser projectUser = ProjectUser.builder()
+                .projectId(projectId)
+                .userId(user.getId())
+                .roleId(role.getId())
+                .status(Status.ACTIVE)
+                .joinedAt(new Date())
+                .build();
+        projectUserRepository.save(projectUser);
+
+        UserProjectRole userProjectRole = UserProjectRole.builder()
+                .userId(user.getId())
+                .projectId(projectId)
+                .roleId(role.getId())
+                .build();
+        userProjectRepository.save(userProjectRole);
+
     }
 
 }
