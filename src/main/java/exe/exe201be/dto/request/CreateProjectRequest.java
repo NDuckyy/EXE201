@@ -26,6 +26,4 @@ public class CreateProjectRequest {
     @Schema(description = "Due date of the task (yyyy-MM-dd)", example = "2023-12-31")
     private Date endDate;
 
-    @Schema(description = "Size of the project team", example = "10")
-    private Integer teamSize;
 }

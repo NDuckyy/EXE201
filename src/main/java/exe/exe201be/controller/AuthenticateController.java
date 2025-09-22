@@ -74,20 +74,7 @@ public class AuthenticateController {
         if (ok) {
             User user = userService.getUserByEmail(loginRequest.getEmail());
 
-            // 🔹 Gọi service để lấy tất cả authorities
-            List<String> authorities = authorityService.getAuthoritiesForUser(user.getId().toHexString());
-
-            // 🔹 Generate JWT với authorities
-            String token = jwtUtilsHelper.generate(user.getId().toHexString(), user.getEmail(), authorities);
-
-            // 🔹 Set cookie
-            Cookie cookie = new Cookie("access_token", token);
-            cookie.setHttpOnly(true);
-            cookie.setSecure(true);
-            cookie.setPath("/");
-            cookie.setMaxAge(60 * 60 * 24 * 30); // 30 ngày
-
-            httpResponse.addCookie(cookie);
+            String token = authorityService.refreshUserToken(user, httpResponse);
 
             response.setMessage("Login Successfully");
             response.setData(token);

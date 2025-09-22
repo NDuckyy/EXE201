@@ -64,6 +64,16 @@ public class ServicePackage {
     @Indexed
     private List<String> features;
 
+    @Schema(description = "Scope of services", example = "[\"Basic\", \"Standard\"]")
+    @Field("service_scope")
+    @Indexed
+    private List<String> serviceScope;
+
+    @Schema(description = "Estimated delivery times", example = "[\"3 days\", \"5 days\"]")
+    @Field("estimated_delivery")
+    @Indexed
+    private List<String> estimatedDelivery;
+
     @Schema(description = "Image URL", example = "https://example.com/image.jpg")
     @Indexed
     private String image;
