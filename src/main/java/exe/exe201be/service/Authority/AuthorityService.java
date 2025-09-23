@@ -7,6 +7,8 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -63,13 +65,15 @@ public class AuthorityService {
         List<String> authorities = getAuthoritiesForUser(user.getId().toHexString());
         String token = jwtUtilsHelper.generate(user.getId().toHexString(), user.getEmail(), authorities);
 
-        Cookie cookie = new Cookie("access_token", token);
-        cookie.setHttpOnly(true);
-        cookie.setSecure(true);
-        cookie.setPath("/");
-        cookie.setMaxAge(60 * 60 * 24 * 30);
+        ResponseCookie cookie = ResponseCookie.from("access_token", token)
+                .httpOnly(true)
+                .secure(true)
+                .path("/")
+                .maxAge(60 * 60 * 24 * 30)
+                .sameSite("None") // <--- có hỗ trợ SameSite
+                .build();
 
-        httpResponse.addCookie(cookie);
+        httpResponse.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
         return token;
     }
 }
