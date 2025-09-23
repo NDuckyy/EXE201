@@ -101,6 +101,7 @@ public class TaskServiceImpl implements TaskService {
                 .id(user.getId().toHexString())
                 .fullName(user.getFullName())
                 .email(user.getEmail())
+                .avatarUrl(user.getAvatar_url())
                 .phone(user.getPhone())
                 .address(user.getAddress())
                 .build() : null;
