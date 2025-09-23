@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("api/{projectId}/tasks")
+@RequestMapping("/api/{projectId}/tasks")
 public class TaskController {
     @Autowired
     private TaskService taskService;
