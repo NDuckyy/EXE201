@@ -4,9 +4,13 @@ import exe.exe201be.dto.request.CreateServiceProviderRequest;
 import exe.exe201be.dto.response.ServiceProviderResponse;
 import exe.exe201be.exception.AppException;
 import exe.exe201be.exception.ErrorCode;
+import exe.exe201be.pojo.Role;
 import exe.exe201be.pojo.ServiceProvider;
+import exe.exe201be.pojo.UserGlobalRole;
 import exe.exe201be.pojo.type.Status;
+import exe.exe201be.repository.RoleRepository;
 import exe.exe201be.repository.ServiceProviderRepository;
+import exe.exe201be.repository.UserGlobalRepository;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -17,6 +21,12 @@ import java.util.List;
 public class ServiceProviderServiceImpl implements ServiceProviderService {
     @Autowired
     private ServiceProviderRepository serviceProviderRepository;
+
+    @Autowired
+    private UserGlobalRepository userGlobalRepository;
+
+    @Autowired
+    private RoleRepository roleRepository;
 
     @Override
     public List<ServiceProvider> getAllServiceProviders() {
@@ -34,7 +44,7 @@ public class ServiceProviderServiceImpl implements ServiceProviderService {
     }
 
     @Override
-    public ServiceProviderResponse createServiceProvider(CreateServiceProviderRequest request) {
+    public ServiceProviderResponse createServiceProvider(ObjectId userId, CreateServiceProviderRequest request) {
         if (serviceProviderRepository.existsByName(request.getName())) {
             throw new AppException(ErrorCode.SERVICE_PROVIDER_NAME_ALREADY_EXISTS);
         }
@@ -44,12 +54,19 @@ public class ServiceProviderServiceImpl implements ServiceProviderService {
         if (serviceProviderRepository.existsByPhoneNumber(request.getPhoneNumber())) {
             throw new AppException(ErrorCode.SERVICE_PROVIDER_PHONE_NUMBER_ALREADY_EXISTS);
         }
+
+        UserGlobalRole userGlobalRole = userGlobalRepository.findByUserId(userId);
+        Role role = roleRepository.findByKey("PROVIDER");
+        userGlobalRole.setRoleId(role.getId());
+        userGlobalRepository.save(userGlobalRole);
+
         ServiceProvider serviceProvider = ServiceProvider.builder()
                 .name(request.getName())
                 .contactEmail(request.getContactEmail())
                 .phoneNumber(request.getPhoneNumber())
                 .address(request.getAddress())
-                .status(Status.ACTIVE)
+                .website(request.getWebsite())
+                .status(Status.INACTIVE)
                 .build();
 
         serviceProviderRepository.save(serviceProvider);

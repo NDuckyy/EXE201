@@ -74,6 +74,10 @@ public class SecurityConfig {
                                 "/api/projects/{id}"
                         ).permitAll()
 
+                        .requestMatchers(HttpMethod.POST,
+                                "/api/service-providers")
+                        .hasAnyAuthority("ADMIN", "USER")
+
                         .requestMatchers(HttpMethod.PATCH,
                                 "/api/service-providers/{id}"
                         ).hasAuthority("ADMIN")
@@ -81,6 +85,10 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.PATCH,
                                 "/api/service-packages/{id}"
                         ).hasAuthority("PROVIDER")
+
+                        .requestMatchers(HttpMethod.POST,
+                                "/api/service-packages")
+                        .hasAuthority("PROVIDER")
 
                         .requestMatchers(HttpMethod.DELETE,
                                 "/api/users/{id}").hasAuthority("ADMIN")

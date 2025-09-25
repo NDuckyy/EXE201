@@ -12,4 +12,6 @@ public interface ServiceProviderRepository extends MongoRepository<ServiceProvid
     boolean existsByName(String name);
     boolean existsByContactEmail(String contactEmail);
     boolean existsByPhoneNumber(String phoneNumber);
+
+    ServiceProvider findByUserId(ObjectId id);
 }

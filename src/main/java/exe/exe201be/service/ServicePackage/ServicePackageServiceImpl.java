@@ -1,5 +1,6 @@
 package exe.exe201be.service.ServicePackage;
 
+import exe.exe201be.dto.request.CreateServicePackageRequest;
 import exe.exe201be.dto.request.SearchRequest;
 import exe.exe201be.dto.response.SearchResponse;
 import exe.exe201be.dto.response.ServicePackageResponse;
@@ -69,12 +70,33 @@ public class ServicePackageServiceImpl implements ServicePackageService {
     }
 
     @Override
-    public ServicePackageResponse createServicePackage(ServicePackageService servicePackage) {
-        return null;
+    public ServicePackageResponse createServicePackage(ObjectId providerId, CreateServicePackageRequest servicePackage) {
+        ServiceProvider serviceProvider = serviceProviderRepository.findByUserId(providerId);
+        if (serviceProvider == null) {
+            throw new AppException(ErrorCode.SERVICE_PROVIDER_NOT_FOUND);
+        }
+
+        ServicePackage newServicePackage = ServicePackage.builder()
+                .providerId(providerId)
+                .name(servicePackage.getName())
+                .description(servicePackage.getDescription())
+                .price(servicePackage.getPrice())
+                .currency(servicePackage.getCurrency())
+                .durationMonths(servicePackage.getDurationMonths())
+                .discountPercent(servicePackage.getDiscountPercent())
+                .features(servicePackage.getFeatures())
+                .serviceScope(servicePackage.getServiceScope())
+                .estimatedDelivery(servicePackage.getEstimatedDelivery())
+                .image(servicePackage.getImage())
+                .status(Status.INACTIVE)
+                .build();
+
+        servicePackageRepository.save(newServicePackage);
+        return getServicePackageResponse(newServicePackage, serviceProvider);
     }
 
     @Override
-    public ServicePackageResponse updateServicePackage(String id, ServicePackageService servicePackage) {
+    public ServicePackageResponse updateServicePackage(ObjectId id, CreateServicePackageRequest servicePackage) {
         return null;
     }
 
