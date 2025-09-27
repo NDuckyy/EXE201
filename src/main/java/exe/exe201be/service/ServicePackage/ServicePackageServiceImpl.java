@@ -81,7 +81,6 @@ public class ServicePackageServiceImpl implements ServicePackageService {
                 .name(servicePackage.getName())
                 .description(servicePackage.getDescription())
                 .price(servicePackage.getPrice())
-                .currency(servicePackage.getCurrency())
                 .durationMonths(servicePackage.getDurationMonths())
                 .discountPercent(servicePackage.getDiscountPercent())
                 .features(servicePackage.getFeatures())
@@ -110,9 +109,6 @@ public class ServicePackageServiceImpl implements ServicePackageService {
         }
         if( servicePackage.getPrice() != null && servicePackage.getPrice() > 0) {
             existingServicePackage.setPrice(servicePackage.getPrice());
-        }
-        if( servicePackage.getCurrency() != null && !servicePackage.getCurrency().isBlank()) {
-            existingServicePackage.setCurrency(servicePackage.getCurrency());
         }
         if( servicePackage.getDurationMonths() != null && servicePackage.getDurationMonths() > 0) {
             existingServicePackage.setDurationMonths(servicePackage.getDurationMonths());
@@ -197,7 +193,6 @@ public class ServicePackageServiceImpl implements ServicePackageService {
                 .name(sp.getName())
                 .description(sp.getDescription())
                 .price(sp.getPrice())
-                .currency(sp.getCurrency())
                 .durationMonths(sp.getDurationMonths())
                 .discountPercent(sp.getDiscountPercent())
                 .features(sp.getFeatures())

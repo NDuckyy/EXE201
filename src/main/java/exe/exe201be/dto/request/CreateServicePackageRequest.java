@@ -27,9 +27,6 @@ public class CreateServicePackageRequest {
     @Schema(description = "Price", example = "149.0")
     private Double price;
 
-    @Schema(description = "Currency code", example = "USD")
-    private String currency;
-
     @Schema(description = "Duration in months", example = "1")
     private Integer durationMonths;
 

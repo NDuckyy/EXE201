@@ -46,10 +46,6 @@ public class ServicePackage {
     @Indexed
     private Double price;
 
-    @Schema(description = "Currency code", example = "USD")
-    @Indexed
-    private String currency;
-
     @Schema(description = "Duration in months", example = "1")
     @Field("duration_months")
     @Indexed

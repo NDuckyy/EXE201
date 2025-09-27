@@ -24,7 +24,7 @@ public enum ErrorCode {
     USER_NOT_FOUND(404, "User not found"),
     USER_ALREADY_IN_PROJECT(409, "User already in project"),
     USER_ALREADY_A_SERVICE_PROVIDER(409, "Provider role is inactive please contact admin"),
-
+    PAYMENT_NOT_FOUND(404, "Payment not found"),
     ;
     ErrorCode(int code, String message) {
         this.code = code;

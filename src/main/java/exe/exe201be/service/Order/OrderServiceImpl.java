@@ -1,17 +1,15 @@
 package exe.exe201be.service.Order;
 
+import exe.exe201be.dto.request.ChangeStatusRequest;
+import exe.exe201be.dto.request.CreateOrderRequest;
 import exe.exe201be.dto.response.OrderDetailResponse;
 import exe.exe201be.dto.response.OrderResponse;
 import exe.exe201be.dto.response.UserResponse;
 import exe.exe201be.exception.AppException;
 import exe.exe201be.exception.ErrorCode;
-import exe.exe201be.pojo.Order;
-import exe.exe201be.pojo.Payment;
-import exe.exe201be.pojo.User;
-import exe.exe201be.repository.OrderDetailRepository;
-import exe.exe201be.repository.OrderRepository;
-import exe.exe201be.repository.PaymentRepository;
-import exe.exe201be.repository.UserRepository;
+import exe.exe201be.pojo.*;
+import exe.exe201be.pojo.type.Status;
+import exe.exe201be.repository.*;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -33,6 +31,9 @@ public class OrderServiceImpl implements OrderService {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private ServicePackageRepository servicePackageRepository;
 
     @Override
     public List<OrderResponse> getAllOrderByUserId(ObjectId userId) {
@@ -85,12 +86,46 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public void createOrder(ObjectId userId, ObjectId servicePackageId, int quantity) {
+    public void createOrder(ObjectId userId, ObjectId servicePackageId, CreateOrderRequest createOrderRequest) {
+        User user = userRepository.findById(userId).orElse(null);
+        if (user == null) {
+            throw new AppException(ErrorCode.USER_NOT_FOUND);
+        }
+        ServicePackage servicePackage = servicePackageRepository.findById(servicePackageId).orElse(null);
+        if (servicePackage == null) {
+            throw new AppException(ErrorCode.SERVICE_PACKAGE_NOT_FOUND);
+        }
+        Payment payment = paymentRepository.findAllByMethod(createOrderRequest.getPaymentMethod());
+        if (payment == null) {
+            throw new AppException(ErrorCode.PAYMENT_NOT_FOUND);
+        }
 
+        Order order = Order.builder()
+                .userId(userId)
+                .paymentId(payment.getId())
+                .total(servicePackage.getPrice() * createOrderRequest.getQuantity())
+                .currency("VND")
+                .status(Status.PENDING)
+                .build();
+        orderRepository.save(order);
+
+        OrderDetail orderDetail = OrderDetail.builder()
+                .orderId(order.getId())
+                .packageId(servicePackageId)
+                .unitPrice(servicePackage.getPrice())
+                .quantity(createOrderRequest.getQuantity())
+                .build();
+
+        orderDetailRepository.save(orderDetail);
     }
 
     @Override
-    public void updateStatusOrder(ObjectId orderId, String status) {
-
+    public void updateStatusOrder(ObjectId orderId, ChangeStatusRequest status) {
+        Order order = orderRepository.findById(orderId).orElse(null);
+        if (order == null) {
+            throw new AppException(ErrorCode.ORDER_NOT_FOUND);
+        }
+        order.setStatus(status.getStatus());
+        orderRepository.save(order);
     }
 }
