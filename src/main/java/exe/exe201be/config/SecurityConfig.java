@@ -90,6 +90,10 @@ public class SecurityConfig {
                                 "/api/service-packages")
                         .hasAuthority("PROVIDER")
 
+                        .requestMatchers(HttpMethod.PUT,
+                                "/api/service-providers/{providerId}",
+                                "/api/service-packages/{serviceId}").hasAuthority("PROVIDER")
+
                         .requestMatchers(HttpMethod.DELETE,
                                 "/api/users/{id}").hasAuthority("ADMIN")
 

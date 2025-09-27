@@ -89,12 +89,32 @@ public class ServiceProviderController {
                             schema = @Schema(implementation = ServiceProviderResponse.class))
             )
     })
-    public APIResponse<ServiceProviderResponse> createServiceProvider(@RequestBody  CreateServiceProviderRequest request , @AuthenticationPrincipal Jwt jwt) {
+    public APIResponse<ServiceProviderResponse> createServiceProvider(@RequestBody CreateServiceProviderRequest request, @AuthenticationPrincipal Jwt jwt) {
         ObjectId userId = new ObjectId(jwt.getSubject());
         ServiceProviderResponse serviceProviderResponse = serviceProviderService.createServiceProvider(userId, request);
         APIResponse<ServiceProviderResponse> response = new APIResponse<>();
         response.setMessage("Create service provider success");
         response.setData(serviceProviderResponse);
+        return response;
+    }
+
+
+    @PutMapping("/{providerId}")
+    @Operation(summary = "Update Service Provider", description = "Update an existing service provider by its ID")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Service provider updated successfully",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ServiceProviderResponse.class))
+            )
+    })
+    public APIResponse<ServiceProviderResponse> updateServiceProvider(@PathVariable String providerId, @RequestBody CreateServiceProviderRequest serviceProvider) {
+        APIResponse<ServiceProviderResponse> response = new APIResponse<>();
+        ObjectId id = new ObjectId(providerId);
+        response.setMessage("Update service provider success");
+        response.setData(serviceProviderService.updateServiceProvider(id, serviceProvider));
         return response;
     }
 

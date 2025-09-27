@@ -97,7 +97,45 @@ public class ServicePackageServiceImpl implements ServicePackageService {
 
     @Override
     public ServicePackageResponse updateServicePackage(ObjectId id, CreateServicePackageRequest servicePackage) {
-        return null;
+        ServicePackage existingServicePackage = servicePackageRepository.findById(id).orElse(null);
+        if (existingServicePackage == null) {
+            throw new AppException(ErrorCode.SERVICE_PACKAGE_NOT_FOUND);
+        }
+
+        if( servicePackage.getName() != null && !servicePackage.getName().isBlank()) {
+            existingServicePackage.setName(servicePackage.getName());
+        }
+        if( servicePackage.getDescription() != null && !servicePackage.getDescription().isBlank()) {
+            existingServicePackage.setDescription(servicePackage.getDescription());
+        }
+        if( servicePackage.getPrice() != null && servicePackage.getPrice() > 0) {
+            existingServicePackage.setPrice(servicePackage.getPrice());
+        }
+        if( servicePackage.getCurrency() != null && !servicePackage.getCurrency().isBlank()) {
+            existingServicePackage.setCurrency(servicePackage.getCurrency());
+        }
+        if( servicePackage.getDurationMonths() != null && servicePackage.getDurationMonths() > 0) {
+            existingServicePackage.setDurationMonths(servicePackage.getDurationMonths());
+        }
+        if( servicePackage.getDiscountPercent() != null && servicePackage.getDiscountPercent() >= 0) {
+            existingServicePackage.setDiscountPercent(servicePackage.getDiscountPercent());
+        }
+        if( servicePackage.getFeatures() != null && !servicePackage.getFeatures().isEmpty()) {
+            existingServicePackage.setFeatures(servicePackage.getFeatures());
+        }
+        if( servicePackage.getServiceScope() != null && !servicePackage.getServiceScope().isEmpty()) {
+            existingServicePackage.setServiceScope(servicePackage.getServiceScope());
+        }
+        if( servicePackage.getEstimatedDelivery() != null && !servicePackage.getEstimatedDelivery().isEmpty()) {
+            existingServicePackage.setEstimatedDelivery(servicePackage.getEstimatedDelivery());
+        }
+        if( servicePackage.getImage() != null && !servicePackage.getImage().isBlank()) {
+            existingServicePackage.setImage(servicePackage.getImage());
+        }
+        servicePackageRepository.save(existingServicePackage);
+
+        ServiceProvider serviceProvider = serviceProviderRepository.findById(existingServicePackage.getProviderId()).orElse(null);
+        return getServicePackageResponse(existingServicePackage, serviceProvider);
     }
 
     @Override

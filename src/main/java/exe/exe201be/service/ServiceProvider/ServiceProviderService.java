@@ -11,6 +11,6 @@ public interface ServiceProviderService {
     List<ServiceProvider>  getAllServiceProviders();
     ServiceProvider getServiceProviderById(String id);
     ServiceProviderResponse createServiceProvider(ObjectId userId, CreateServiceProviderRequest request);
-    ServiceProvider updateServiceProvider(String id, ServiceProvider serviceProvider);
+    ServiceProviderResponse updateServiceProvider(ObjectId id, CreateServiceProviderRequest serviceProvider);
     void changeStatusServiceProvider(String id);
 }

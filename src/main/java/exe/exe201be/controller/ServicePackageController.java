@@ -125,4 +125,25 @@ public class ServicePackageController {
         return response;
 
     }
+
+    @PutMapping("/{serviceId}")
+    @Operation(summary = "Update Service Package", description = "Update an existing service package by its ID")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Service package updated successfully",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ServicePackageResponse.class))
+            ),
+    })
+    public APIResponse<ServicePackageResponse> updateServicePackage(@PathVariable String serviceId, @RequestBody CreateServicePackageRequest servicePackage) {
+        APIResponse<ServicePackageResponse> response = new APIResponse<>();
+        ObjectId id = new ObjectId(serviceId);
+        response.setMessage("Update service package success");
+        response.setData(servicePackageService.updateServicePackage(id, servicePackage));
+        return response;
+    }
+
+
 }

@@ -45,6 +45,10 @@ public class ServiceProviderServiceImpl implements ServiceProviderService {
 
     @Override
     public ServiceProviderResponse createServiceProvider(ObjectId userId, CreateServiceProviderRequest request) {
+        ServiceProvider existingProvider = serviceProviderRepository.findByUserId(userId);
+        if (existingProvider != null) {
+            throw new AppException(ErrorCode.USER_ALREADY_A_SERVICE_PROVIDER);
+        }
         if (serviceProviderRepository.existsByName(request.getName())) {
             throw new AppException(ErrorCode.SERVICE_PROVIDER_NAME_ALREADY_EXISTS);
         }
@@ -55,12 +59,8 @@ public class ServiceProviderServiceImpl implements ServiceProviderService {
             throw new AppException(ErrorCode.SERVICE_PROVIDER_PHONE_NUMBER_ALREADY_EXISTS);
         }
 
-        UserGlobalRole userGlobalRole = userGlobalRepository.findByUserId(userId);
-        Role role = roleRepository.findByKey("PROVIDER");
-        userGlobalRole.setRoleId(role.getId());
-        userGlobalRepository.save(userGlobalRole);
-
         ServiceProvider serviceProvider = ServiceProvider.builder()
+                .userId(userId)
                 .name(request.getName())
                 .contactEmail(request.getContactEmail())
                 .phoneNumber(request.getPhoneNumber())
@@ -81,8 +81,48 @@ public class ServiceProviderServiceImpl implements ServiceProviderService {
     }
 
     @Override
-    public ServiceProvider updateServiceProvider(String id, ServiceProvider serviceProvider) {
-        return null;
+    public ServiceProviderResponse updateServiceProvider(ObjectId id, CreateServiceProviderRequest serviceProvider) {
+        ServiceProvider existingProvider = serviceProviderRepository.findById(id).orElse(null);
+        if (existingProvider == null) {
+            throw new AppException(ErrorCode.SERVICE_PROVIDER_NOT_FOUND);
+        }
+        if (!existingProvider.getName().equals(serviceProvider.getName()) &&
+                serviceProviderRepository.existsByName(serviceProvider.getName())) {
+            throw new AppException(ErrorCode.SERVICE_PROVIDER_NAME_ALREADY_EXISTS);
+        }
+        if (!existingProvider.getContactEmail().equals(serviceProvider.getContactEmail()) &&
+                serviceProviderRepository.existsByContactEmail(serviceProvider.getContactEmail())) {
+            throw new AppException(ErrorCode.SERVICE_PROVIDER_CONTACT_EMAIL_ALREADY_EXISTS);
+        }
+        if (!existingProvider.getPhoneNumber().equals(serviceProvider.getPhoneNumber()) &&
+                serviceProviderRepository.existsByPhoneNumber(serviceProvider.getPhoneNumber())) {
+            throw new AppException(ErrorCode.SERVICE_PROVIDER_PHONE_NUMBER_ALREADY_EXISTS);
+        }
+
+        if (serviceProvider.getName() != null) {
+            existingProvider.setName(serviceProvider.getName());
+        }
+        if (serviceProvider.getContactEmail() != null) {
+            existingProvider.setContactEmail(serviceProvider.getContactEmail());
+        }
+        if (serviceProvider.getPhoneNumber() != null) {
+            existingProvider.setPhoneNumber(serviceProvider.getPhoneNumber());
+        }
+        if (serviceProvider.getAddress() != null) {
+            existingProvider.setAddress(serviceProvider.getAddress());
+        }
+        if (serviceProvider.getWebsite() != null) {
+            existingProvider.setWebsite(serviceProvider.getWebsite());
+        }
+        serviceProviderRepository.save(existingProvider);
+        return ServiceProviderResponse.builder()
+                .id(existingProvider.getId().toHexString())
+                .name(existingProvider.getName())
+                .contactEmail(existingProvider.getContactEmail())
+                .phoneNumber(existingProvider.getPhoneNumber())
+                .address(existingProvider.getAddress())
+                .website(existingProvider.getWebsite())
+                .build();
     }
 
     @Override
@@ -93,9 +133,19 @@ public class ServiceProviderServiceImpl implements ServiceProviderService {
             throw new AppException(ErrorCode.SERVICE_PROVIDER_NOT_FOUND);
         }
         if (serviceProvider.getStatus() == Status.ACTIVE) {
+            UserGlobalRole userGlobalRole = userGlobalRepository.findByUserId(serviceProvider.getUserId());
+            Role role = roleRepository.findByKey("USER");
+            userGlobalRole.setRoleId(role.getId());
+            userGlobalRepository.save(userGlobalRole);
+
             serviceProvider.setStatus(Status.INACTIVE);
             serviceProviderRepository.save(serviceProvider);
         } else {
+            UserGlobalRole userGlobalRole = userGlobalRepository.findByUserId(serviceProvider.getUserId());
+            Role role = roleRepository.findByKey("PROVIDER");
+            userGlobalRole.setRoleId(role.getId());
+            userGlobalRepository.save(userGlobalRole);
+
             serviceProvider.setStatus(Status.ACTIVE);
             serviceProviderRepository.save(serviceProvider);
         }
