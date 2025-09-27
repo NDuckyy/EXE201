@@ -10,7 +10,10 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -86,11 +89,32 @@ public class ServiceProviderController {
                             schema = @Schema(implementation = ServiceProviderResponse.class))
             )
     })
-    public APIResponse<ServiceProviderResponse> createServiceProvider(@RequestBody  CreateServiceProviderRequest request) {
-        ServiceProviderResponse serviceProviderResponse = serviceProviderService.createServiceProvider(request);
+    public APIResponse<ServiceProviderResponse> createServiceProvider(@RequestBody CreateServiceProviderRequest request, @AuthenticationPrincipal Jwt jwt) {
+        ObjectId userId = new ObjectId(jwt.getSubject());
+        ServiceProviderResponse serviceProviderResponse = serviceProviderService.createServiceProvider(userId, request);
         APIResponse<ServiceProviderResponse> response = new APIResponse<>();
         response.setMessage("Create service provider success");
         response.setData(serviceProviderResponse);
+        return response;
+    }
+
+
+    @PutMapping("/{providerId}")
+    @Operation(summary = "Update Service Provider", description = "Update an existing service provider by its ID")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Service provider updated successfully",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ServiceProviderResponse.class))
+            )
+    })
+    public APIResponse<ServiceProviderResponse> updateServiceProvider(@PathVariable String providerId, @RequestBody CreateServiceProviderRequest serviceProvider) {
+        APIResponse<ServiceProviderResponse> response = new APIResponse<>();
+        ObjectId id = new ObjectId(providerId);
+        response.setMessage("Update service provider success");
+        response.setData(serviceProviderService.updateServiceProvider(id, serviceProvider));
         return response;
     }
 

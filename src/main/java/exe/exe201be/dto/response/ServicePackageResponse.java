@@ -17,7 +17,6 @@ public class ServicePackageResponse {
     private String name;
     private String description;
     private double price;
-    private String currency;
     private int durationMonths;
     private int discountPercent;
     private List<String> features;

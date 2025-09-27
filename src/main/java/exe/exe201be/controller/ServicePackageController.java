@@ -1,5 +1,6 @@
 package exe.exe201be.controller;
 
+import exe.exe201be.dto.request.CreateServicePackageRequest;
 import exe.exe201be.dto.request.SearchRequest;
 import exe.exe201be.dto.response.APIResponse;
 import exe.exe201be.dto.response.SearchResponse;
@@ -11,7 +12,10 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -101,4 +105,45 @@ public class ServicePackageController {
         response.setData(servicePackageService.searchServicePackages(searchRequest));
         return response;
     }
+
+    @PostMapping
+    @Operation(summary = "Create Service Package", description = "Create a new service package")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Service package created successfully",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ServicePackageResponse.class))
+            ),
+    })
+    public APIResponse<ServicePackageResponse> createServicePackage(@AuthenticationPrincipal Jwt jwt, @RequestBody CreateServicePackageRequest servicePackage) {
+        APIResponse<ServicePackageResponse> response = new APIResponse<>();
+        ObjectId providerId = new ObjectId(jwt.getSubject());
+        response.setMessage("Create service package success");
+        response.setData(servicePackageService.createServicePackage(providerId, servicePackage));
+        return response;
+
+    }
+
+    @PutMapping("/{serviceId}")
+    @Operation(summary = "Update Service Package", description = "Update an existing service package by its ID")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Service package updated successfully",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ServicePackageResponse.class))
+            ),
+    })
+    public APIResponse<ServicePackageResponse> updateServicePackage(@PathVariable String serviceId, @RequestBody CreateServicePackageRequest servicePackage) {
+        APIResponse<ServicePackageResponse> response = new APIResponse<>();
+        ObjectId id = new ObjectId(serviceId);
+        response.setMessage("Update service package success");
+        response.setData(servicePackageService.updateServicePackage(id, servicePackage));
+        return response;
+    }
+
+
 }

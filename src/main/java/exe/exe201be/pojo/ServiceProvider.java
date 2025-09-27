@@ -28,6 +28,10 @@ public class ServiceProvider {
     @JsonSerialize(using = ToStringSerializer.class)
     private ObjectId id;
 
+    @Schema(description = "User ID associated with the service provider", example = "651000000000000000000002")
+    @Field("user_id")
+    private ObjectId userId;
+
     @Schema(description = "Name of the service provider", example = "Shine Solutions")
     @Indexed
     private String name;

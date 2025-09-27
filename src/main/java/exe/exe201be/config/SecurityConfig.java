@@ -74,13 +74,26 @@ public class SecurityConfig {
                                 "/api/projects/{id}"
                         ).permitAll()
 
+                        .requestMatchers(HttpMethod.POST,
+                                "/api/service-providers")
+                        .hasAnyAuthority("ADMIN", "USER")
+
                         .requestMatchers(HttpMethod.PATCH,
                                 "/api/service-providers/{id}"
                         ).hasAuthority("ADMIN")
 
                         .requestMatchers(HttpMethod.PATCH,
-                                "/api/service-packages/{id}"
+                                "/api/service-packages/{id}",
+                                "/api/orders/{id}"
                         ).hasAuthority("PROVIDER")
+
+                        .requestMatchers(HttpMethod.POST,
+                                "/api/service-packages")
+                        .hasAuthority("PROVIDER")
+
+                        .requestMatchers(HttpMethod.PUT,
+                                "/api/service-providers/{providerId}",
+                                "/api/service-packages/{serviceId}").hasAuthority("PROVIDER")
 
                         .requestMatchers(HttpMethod.DELETE,
                                 "/api/users/{id}").hasAuthority("ADMIN")
@@ -93,14 +106,15 @@ public class SecurityConfig {
                                 "/api/projects/{projectId}/members").access(this::isProjectLeader)
 
                         .requestMatchers(HttpMethod.POST,
-                                "/api/projects").hasAuthority("USER")
+                                "/api/projects",
+                                "/api/orders").hasAuthority("USER")
 
                         .requestMatchers(HttpMethod.GET,
                                 "/api/{projectId}/tasks",
                                 "/api/{projectId}/tasks/{taskId}").access(this::isProjectMemberOrLeader)
 
                         .requestMatchers(HttpMethod.GET,
-                                "/api/orders").hasAnyAuthority("USER", "PROVIDER", "ADMIN")
+                                "/api/orders/user").hasAuthority("USER")
 
                         .requestMatchers(HttpMethod.GET,
                                 "/api/dashboard/member-data").hasAuthority("USER")
