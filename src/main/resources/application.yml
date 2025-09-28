@@ -23,4 +23,4 @@ app:
 server:
   forward-headers-strategy: native   # Quan trọng: để Spring nhận X-Forwarded-* headers
 
-
+api-key-webhook-payment: api-key-hello-founderhub-123abc!@@@

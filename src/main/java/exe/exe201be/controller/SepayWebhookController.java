@@ -5,13 +5,13 @@ import exe.exe201be.dto.request.SepayWebhookRequest;
 import exe.exe201be.dto.response.APIResponse;
 import exe.exe201be.pojo.Order;
 import exe.exe201be.pojo.type.Status;
-import exe.exe201be.repository.OrderRepository;
 import exe.exe201be.service.Order.OrderService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.*;
+import java.util.Objects;
 
 @RestController
 @RequestMapping("/api/webhook")
@@ -20,12 +20,25 @@ public class SepayWebhookController {
 
     private final OrderService orderService;
 
+    @Value("${api-key-webhook-payment}")
+    private String sepayWebhookApiKey;
+
     @PostMapping("/sepay")
-    public ResponseEntity<APIResponse<String>> handleSepayWebhook(@RequestBody SepayWebhookRequest data) {
+    public ResponseEntity<APIResponse<String>> handleSepayWebhook(
+            @RequestBody SepayWebhookRequest data,
+            @RequestHeader(value = "Authorization", required = false) String authHeader
+    ) {
         APIResponse<String> response = new APIResponse<>();
 
         try {
-            // 1. Kiểm tra description
+            // 0. Xác thực API Key
+            String expectedHeader = "Apikey " + sepayWebhookApiKey;
+            if (authHeader == null || !authHeader.equals(expectedHeader)) {
+                response.setCode(401);
+                response.setMessage("Unauthorized: Invalid API Key");
+                return ResponseEntity.status(401).body(response);
+            }
+
             String ref = extractReference(data.getDescription());
             if (ref == null) {
                 response.setCode(400);
@@ -33,7 +46,6 @@ public class SepayWebhookController {
                 return ResponseEntity.badRequest().body(response);
             }
 
-            // 2. Tìm order theo referenceCode
             Order order = orderService.findByReferenceCode(ref);
             if (order == null) {
                 response.setCode(404);
@@ -41,7 +53,6 @@ public class SepayWebhookController {
                 return ResponseEntity.status(404).body(response);
             }
 
-            // 3. Kiểm tra trạng thái hiện tại
             if (order.getStatus() == Status.PAID) {
                 response.setCode(200);
                 response.setMessage("Order already marked as PAID");
@@ -53,9 +64,7 @@ public class SepayWebhookController {
                 return ResponseEntity.badRequest().body(response);
             }
 
-            // 4. Kiểm tra số tiền
             if (!Objects.equals(order.getTotal(), data.getAmount())) {
-                // Nếu số tiền không khớp, có thể log lại và set FAILED
                 orderService.updateStatusOrder(order.getId(),
                         ChangeStatusRequest.builder().status(Status.FAILED).build());
 
@@ -64,7 +73,6 @@ public class SepayWebhookController {
                 return ResponseEntity.badRequest().body(response);
             }
 
-            // 5. Happy case -> Update thành PAID
             orderService.updateStatusOrder(order.getId(),
                     ChangeStatusRequest.builder().status(Status.PAID).build());
 
@@ -88,5 +96,4 @@ public class SepayWebhookController {
         }
         return null;
     }
-
 }
