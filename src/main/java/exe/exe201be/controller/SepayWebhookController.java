@@ -39,7 +39,13 @@ public class SepayWebhookController {
                 return ResponseEntity.status(401).body(response);
             }
 
-            String ref = extractReference(data.getDescription());
+            String ref = extractReference(data.getContent(), data.getDescription());
+            if (ref == null) {
+                response.setCode(400);
+                response.setMessage("Invalid or missing reference code in content/description");
+                return ResponseEntity.badRequest().body(response);
+            }
+
             if (ref == null) {
                 response.setCode(400);
                 response.setMessage("Invalid or missing reference code in description");
@@ -64,12 +70,12 @@ public class SepayWebhookController {
                 return ResponseEntity.badRequest().body(response);
             }
 
-            if (!Objects.equals(order.getTotal(), data.getAmount())) {
+            if (!Objects.equals(order.getTotal(), data.getTransferAmount())) {
                 orderService.updateStatusOrder(order.getId(),
                         ChangeStatusRequest.builder().status(Status.FAILED).build());
 
                 response.setCode(400);
-                response.setMessage("Amount mismatch. Expected: " + order.getTotal() + ", got: " + data.getAmount());
+                response.setMessage("Amount mismatch. Expected: " + order.getTotal() + ", got: " + data.getTransferAmount());
                 return ResponseEntity.badRequest().body(response);
             }
 
@@ -90,10 +96,20 @@ public class SepayWebhookController {
     }
 
     // Helper để extract reference từ description
-    private String extractReference(String description) {
-        if (description != null && description.startsWith("PAY_")) {
-            return description;
+    // Helper để extract reference từ webhook (content hoặc description)
+    private String extractReference(String content, String description) {
+        if (content != null && content.contains("PAY")) {
+            return content.trim();
+        }
+        if (description != null && description.contains("PAY")) {
+            // Tách ra code trong description
+            for (String word : description.split("\\s+")) {
+                if (word.startsWith("PAY")) {
+                    return word.trim();
+                }
+            }
         }
         return null;
     }
+
 }
