@@ -59,6 +59,9 @@ public class SecurityConfig {
                                 "/api/users/create",
                                 "/api/images/upload",
                                 "/api/v1/auth/register",
+                                "/api/webhook/sepay",
+                                "/api/payment/create-order",
+                                "api/payment/orders/{id}",
                                 "/api/v1/auth/login").permitAll()
 
                         .requestMatchers(HttpMethod.GET,
