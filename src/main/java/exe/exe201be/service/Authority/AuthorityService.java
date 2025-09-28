@@ -63,7 +63,9 @@ public class AuthorityService {
 
     public String refreshUserToken(User user, HttpServletResponse httpResponse) {
         List<String> authorities = getAuthoritiesForUser(user.getId().toHexString());
-        String token = jwtUtilsHelper.generate(user.getId().toHexString(), user.getEmail(), authorities);
+        UserGlobalRole userGlobalRole = userGlobalRepository.findByUserId(user.getId());
+        Role role = roleRepository.findById(userGlobalRole.getRoleId()).orElse(null);
+        String token = jwtUtilsHelper.generate(user.getId().toHexString(), user.getEmail(), role.getKey(), authorities);
 
         ResponseCookie cookie = ResponseCookie.from("access_token", token)
                 .httpOnly(true)
