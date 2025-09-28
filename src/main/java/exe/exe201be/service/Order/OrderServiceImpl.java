@@ -87,7 +87,7 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public Order createOrder(ObjectId userId, ObjectId servicePackageId, CreateOrderRequest createOrderRequest) {
-        String referenceCode = "PAY_" + UUID.randomUUID().toString().substring(0, 8);
+        String referenceCode = "PAY" + UUID.randomUUID().toString().substring(0, 8);
         User user = userRepository.findById(userId).orElse(null);
         if (user == null) {
             throw new AppException(ErrorCode.USER_NOT_FOUND);
