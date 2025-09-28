@@ -95,21 +95,26 @@ public class SepayWebhookController {
         }
     }
 
-    // Helper để extract reference từ description
-    // Helper để extract reference từ webhook (content hoặc description)
     private String extractReference(String content, String description) {
-        if (content != null && content.contains("PAY")) {
-            return content.trim();
-        }
-        if (description != null && description.contains("PAY")) {
-            // Tách ra code trong description
-            for (String word : description.split("\\s+")) {
-                if (word.startsWith("PAY")) {
-                    return word.trim();
-                }
-            }
+        // Ưu tiên tìm trong content
+        String ref = findPayCode(content);
+        if (ref != null) return ref;
+
+        // Fallback sang description
+        return findPayCode(description);
+    }
+
+    private String findPayCode(String text) {
+        if (text == null) return null;
+
+        // Regex: tìm từ "PAY" + các ký tự chữ/số liền sau
+        java.util.regex.Pattern pattern = java.util.regex.Pattern.compile("(PAY[\\w\\d]+)");
+        java.util.regex.Matcher matcher = pattern.matcher(text);
+        if (matcher.find()) {
+            return matcher.group(1); // chỉ lấy "PAYd6da959d"
         }
         return null;
     }
+
 
 }
