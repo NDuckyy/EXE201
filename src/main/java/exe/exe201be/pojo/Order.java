@@ -20,7 +20,7 @@ import java.util.Date;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
+@Builder(toBuilder = true)
 public class Order {
 
     @Id
@@ -53,4 +53,9 @@ public class Order {
     @Field("created_at")
     @CreatedDate
     private Instant createdAt;
+
+    @Field("reference_code")
+    @Indexed
+    private String referenceCode; // PAY_xxx để khớp webhook
+
 }

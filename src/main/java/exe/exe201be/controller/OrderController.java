@@ -4,6 +4,7 @@ import exe.exe201be.dto.request.ChangeStatusRequest;
 import exe.exe201be.dto.request.CreateOrderRequest;
 import exe.exe201be.dto.response.APIResponse;
 import exe.exe201be.dto.response.OrderResponse;
+import exe.exe201be.pojo.Order;
 import exe.exe201be.service.Order.OrderService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -61,7 +62,7 @@ public class OrderController {
         ObjectId id = new ObjectId(jwt.getSubject());
         ObjectId servicePackageObjId = new ObjectId(createOrderRequest.getServicePackageId());
         APIResponse<?> response = new APIResponse<>();
-        orderService.createOrder(id, servicePackageObjId, createOrderRequest);
+        Order order =  orderService.createOrder(id, servicePackageObjId, createOrderRequest);
         response.setMessage("Create order successfully");
         return response;
     }

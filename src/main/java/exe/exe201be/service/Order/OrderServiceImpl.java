@@ -86,7 +86,8 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public void createOrder(ObjectId userId, ObjectId servicePackageId, CreateOrderRequest createOrderRequest) {
+    public Order createOrder(ObjectId userId, ObjectId servicePackageId, CreateOrderRequest createOrderRequest) {
+        String referenceCode = "PAY_" + UUID.randomUUID().toString().substring(0, 8);
         User user = userRepository.findById(userId).orElse(null);
         if (user == null) {
             throw new AppException(ErrorCode.USER_NOT_FOUND);
@@ -105,6 +106,7 @@ public class OrderServiceImpl implements OrderService {
                 .paymentId(payment.getId())
                 .total(servicePackage.getPrice() * createOrderRequest.getQuantity())
                 .currency("VND")
+                .referenceCode(referenceCode)
                 .status(Status.PENDING)
                 .build();
         orderRepository.save(order);
@@ -117,6 +119,7 @@ public class OrderServiceImpl implements OrderService {
                 .build();
 
         orderDetailRepository.save(orderDetail);
+        return order;
     }
 
     @Override
@@ -127,5 +130,19 @@ public class OrderServiceImpl implements OrderService {
         }
         order.setStatus(status.getStatus());
         orderRepository.save(order);
+    }
+
+    @Override
+    public Optional<Order> getOrderById(ObjectId orderId) {
+        Order order = orderRepository.findById(orderId).orElse(null);
+        if (order == null) {
+            throw new AppException(ErrorCode.ORDER_NOT_FOUND);
+        }
+        return Optional.of(order);
+    }
+
+    @Override
+    public Order findByReferenceCode(String ref) {
+        return orderRepository.findByReferenceCode(ref);
     }
 }

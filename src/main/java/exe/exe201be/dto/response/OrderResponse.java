@@ -20,5 +20,6 @@ public class OrderResponse {
     private Status status;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yy HH:mm:ss", timezone = "UTC")
     private Date createdAt;
+    private String QRLink;
 
 }

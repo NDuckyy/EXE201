@@ -9,13 +9,18 @@ import exe.exe201be.pojo.OrderDetail;
 import org.bson.types.ObjectId;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface OrderService {
     List<OrderResponse> getAllOrderByUserId(ObjectId userId);
 
     List<OrderDetailResponse> getOrderDetailById(ObjectId orderDetailId);
 
-    void createOrder(ObjectId userId, ObjectId servicePackageId, CreateOrderRequest createOrderRequest);
+    Order createOrder(ObjectId userId, ObjectId servicePackageId, CreateOrderRequest createOrderRequest);
 
     void updateStatusOrder(ObjectId orderId, ChangeStatusRequest status);
+
+    Optional<Order> getOrderById(ObjectId orderId);
+
+  Order findByReferenceCode(String ref);
 }
