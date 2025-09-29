@@ -1,11 +1,14 @@
 package exe.exe201be.controller;
 
+import exe.exe201be.dto.request.AddCommentRequest;
 import exe.exe201be.dto.request.ChangeStatusRequest;
 import exe.exe201be.dto.request.CreateTaskRequest;
 import exe.exe201be.dto.response.APIResponse;
 import exe.exe201be.dto.response.TaskResponse;
 import exe.exe201be.pojo.Task;
+import exe.exe201be.pojo.TaskComment;
 import exe.exe201be.service.Task.TaskService;
+import exe.exe201be.service.TaskComment.TaskCommentService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -24,6 +27,8 @@ import java.util.List;
 public class TaskController {
     @Autowired
     private TaskService taskService;
+    @Autowired
+    private TaskCommentService commentService;
 
     @GetMapping
     @Operation(summary = "Get All Tasks by Project ID", description = "Retrieve all tasks associated with a specific project ID")

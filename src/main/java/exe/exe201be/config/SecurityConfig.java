@@ -62,6 +62,7 @@ public class SecurityConfig {
                                 "/api/webhook/sepay",
                                 "/api/payment/create-order",
                                 "api/payment/orders/{id}",
+                                "/api/{projectId}/tasks/{taskId}/comments",
                                 "/api/v1/auth/login").permitAll()
 
                         .requestMatchers(HttpMethod.GET,
@@ -74,7 +75,8 @@ public class SecurityConfig {
                                 "/api/service-providers/*",
                                 "/api/users/{id}",
                                 "/api/projects",
-                                "/api/projects/{id}"
+                                "/api/projects/{id}",
+                                "/api/{projectId}/tasks/{taskId}/comments"
                         ).permitAll()
 
                         .requestMatchers(HttpMethod.POST,
