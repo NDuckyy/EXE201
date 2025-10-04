@@ -2,7 +2,9 @@ package exe.exe201be.service.Project;
 
 import exe.exe201be.dto.request.ChangeStatusRequest;
 import exe.exe201be.dto.request.CreateProjectRequest;
+import exe.exe201be.dto.request.SearchRequest;
 import exe.exe201be.dto.response.ProjectResponse;
+import exe.exe201be.dto.response.SearchResponse;
 import exe.exe201be.dto.response.UserResponse;
 import exe.exe201be.exception.AppException;
 import exe.exe201be.exception.ErrorCode;
@@ -13,6 +15,10 @@ import exe.exe201be.service.Authority.AuthorityService;
 import jakarta.servlet.http.HttpServletResponse;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -140,7 +146,7 @@ public class ProjectServiceImpl implements ProjectService {
             throw new AppException(ErrorCode.USER_NOT_FOUND);
         }
 
-        String token = authorityService.refreshUserToken(user , httpServletResponse);
+        String token = authorityService.refreshUserToken(user, httpServletResponse);
     }
 
     @Override
@@ -200,4 +206,26 @@ public class ProjectServiceImpl implements ProjectService {
 
     }
 
+    @Override
+    public SearchResponse<ProjectResponse> searchProjects(SearchRequest request) {
+        Pageable pageable = PageRequest.of(
+                request.getPage() - 1,
+                request.getSize(),
+                Sort.by(Sort.Direction.fromString(request.getSortDir()), request.getSortBy()));
+        Page<Project> projects = projectRepository.findByNameContainingIgnoreCase(request.getKeyword(), pageable);
+        if (projects.hasContent()) {
+            return SearchResponse.<ProjectResponse>builder()
+                    .content(projects.stream().map(p -> {
+                        User user = userRepository.findById(p.getManagerId()).orElse(null);
+                        return getProjectResponse(p, user);
+                    }).collect(Collectors.toList()))
+                    .page(projects.getNumber() + 1)
+                    .size(projects.getSize())
+                    .totalPages(projects.getTotalPages())
+                    .totalElements(projects.getTotalElements())
+                    .build();
+        } else {
+            throw new AppException(ErrorCode.PROJECT_NOT_FOUND);
+        }
+    }
 }

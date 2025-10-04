@@ -3,8 +3,10 @@ package exe.exe201be.controller;
 import exe.exe201be.dto.request.AddMemberRequest;
 import exe.exe201be.dto.request.ChangeStatusRequest;
 import exe.exe201be.dto.request.CreateProjectRequest;
+import exe.exe201be.dto.request.SearchRequest;
 import exe.exe201be.dto.response.APIResponse;
 import exe.exe201be.dto.response.ProjectResponse;
+import exe.exe201be.dto.response.SearchResponse;
 import exe.exe201be.pojo.Project;
 import exe.exe201be.service.Project.ProjectService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -56,7 +58,7 @@ public class ProjectController {
                             schema = @Schema(implementation = Project.class))
             )
     })
-    public APIResponse<ProjectResponse> getProjectById(@PathVariable  String id) {
+    public APIResponse<ProjectResponse> getProjectById(@PathVariable String id) {
         APIResponse<ProjectResponse> response = new APIResponse<>();
         response.setMessage("Success");
         response.setData(projectService.getProjectById(id));
@@ -92,7 +94,7 @@ public class ProjectController {
                             schema = @Schema(implementation = APIResponse.class))
             )
     })
-    public APIResponse<?> createProject (@RequestBody CreateProjectRequest createProject, @AuthenticationPrincipal Jwt jwt, HttpServletResponse httpServletResponse) {
+    public APIResponse<?> createProject(@RequestBody CreateProjectRequest createProject, @AuthenticationPrincipal Jwt jwt, HttpServletResponse httpServletResponse) {
         APIResponse<?> response = new APIResponse<>();
         ObjectId id = new ObjectId(jwt.getSubject());
         projectService.createProject(createProject, id, httpServletResponse);
@@ -106,6 +108,31 @@ public class ProjectController {
         ObjectId pId = new ObjectId(projectId);
         projectService.addMemberToProject(pId, request.getEmail());
         response.setMessage("Add member to project success");
+        return response;
+    }
+
+    @GetMapping("/search")
+    @Operation(summary = "Search Projects", description = "Search for projects with pagination and sorting")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Search completed successfully",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = SearchResponse.class))
+            )
+    })
+    public APIResponse<SearchResponse<ProjectResponse>> searchProjects(
+            @RequestParam(defaultValue = "", required = false) String keyword,
+            @RequestParam(defaultValue = "1", required = false) int page,
+            @RequestParam(defaultValue = "10", required = false) int size,
+            @RequestParam(defaultValue = "createdAt", required = false) String sortBy,
+            @RequestParam(defaultValue = "asc", required = false) String sortDir
+    ) {
+        APIResponse<SearchResponse<ProjectResponse>> response = new APIResponse<>();
+        SearchRequest searchRequest = new SearchRequest(keyword, page, size, sortBy, sortDir);
+        response.setMessage("Search completed successfully");
+        response.setData(projectService.searchProjects(searchRequest));
         return response;
     }
 }
