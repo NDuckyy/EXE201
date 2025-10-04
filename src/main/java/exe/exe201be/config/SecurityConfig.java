@@ -71,7 +71,8 @@ public class SecurityConfig {
                                 "/api/service-providers/*",
                                 "/api/users/{id}",
                                 "/api/projects",
-                                "/api/projects/{id}"
+                                "/api/projects/{id}",
+                                "/api/projects/search"
                         ).permitAll()
 
                         .requestMatchers(HttpMethod.POST,

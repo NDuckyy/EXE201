@@ -2,7 +2,9 @@ package exe.exe201be.service.Project;
 
 import exe.exe201be.dto.request.ChangeStatusRequest;
 import exe.exe201be.dto.request.CreateProjectRequest;
+import exe.exe201be.dto.request.SearchRequest;
 import exe.exe201be.dto.response.ProjectResponse;
+import exe.exe201be.dto.response.SearchResponse;
 import exe.exe201be.pojo.Project;
 import jakarta.servlet.http.HttpServletResponse;
 import org.bson.types.ObjectId;
@@ -17,4 +19,6 @@ public interface ProjectService {
     void changeStatusProject(String id, ChangeStatusRequest status);
 
     void addMemberToProject(ObjectId projectId, String email);
+
+    SearchResponse<ProjectResponse> searchProjects(SearchRequest request);
 }
