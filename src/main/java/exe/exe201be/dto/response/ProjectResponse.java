@@ -1,12 +1,12 @@
 package exe.exe201be.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import exe.exe201be.pojo.User;
 import exe.exe201be.pojo.type.Status;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 
 import java.util.Date;
+import java.util.List;
 
 @Getter
 @Setter
@@ -14,6 +14,7 @@ import java.util.Date;
 @AllArgsConstructor
 @Builder
 public class ProjectResponse {
+
     @Schema(description = "ID of the project", example = "507f1f77bcf86cd799439011")
     private String id;
 
@@ -23,7 +24,7 @@ public class ProjectResponse {
     @Schema(description = "Description of the project", example = "This is a sample project description.")
     private String description;
 
-    @Schema(description = "Identifier of the project manager", example = "507f1f77bcf86cd799439011")
+    @Schema(description = "Project manager details")
     private UserResponse managerId;
 
     @Schema(description = "Status of the project", example = "active")
@@ -42,4 +43,25 @@ public class ProjectResponse {
 
     @Schema(description = "Progress of the project in percentage", example = "75.5")
     private Double progress;
+
+
+    @Schema(description = "Short introduction for guests or project overview",
+            example = "Ứng dụng ngân hàng di động giúp người dùng chuyển tiền nhanh chóng và an toàn.",
+            nullable = true)
+    private String shortIntro;
+
+    @Schema(description = "Highlighted achievements or key selling point",
+            example = "Hơn 10.000 người dùng trong tháng đầu ra mắt.",
+            nullable = true)
+    private String highlight;
+
+    @Schema(description = "Demo URL for guests to explore or view the product",
+            example = "https://demo.mybankapp.com",
+            nullable = true)
+    private String demoUrl;
+
+    @Schema(description = "List of screenshot image URLs for project showcase",
+            example = "[\"https://cdn.example.com/screen1.png\", \"https://cdn.example.com/screen2.png\"]",
+            nullable = true)
+    private List<String> screenshots;
 }

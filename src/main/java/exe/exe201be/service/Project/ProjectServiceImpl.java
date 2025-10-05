@@ -101,6 +101,10 @@ public class ProjectServiceImpl implements ProjectService {
                 .managerId(userResponse)
                 .startDate(project.getStartDate())
                 .endDate(project.getEndDate())
+                .demoUrl(project.getDemoUrl())
+                .highlight(project.getHighlight())
+                .screenshots(project.getScreenshots())
+                .shortIntro(project.getShortIntro())
                 .status(project.getStatus())
                 .teamSize(project.getTeamSize())
                 .progress(project.getProgress())
@@ -122,7 +126,13 @@ public class ProjectServiceImpl implements ProjectService {
                 .endDate(project.getEndDate())
                 .teamSize(1)
                 .progress(0.0)
+                .shortIntro(project.getShortIntro())
+                .highlight(project.getHighlight())
+                .demoUrl(project.getDemoUrl())
+                .screenshots(project.getScreenshots())
                 .build();
+
+
         projectRepository.save(newProject);
 
         ProjectUser projectUser = ProjectUser.builder()

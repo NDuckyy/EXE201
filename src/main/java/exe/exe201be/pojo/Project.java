@@ -15,6 +15,7 @@ import org.springframework.data.mongodb.core.mapping.Field;
 
 import java.time.Instant;
 import java.util.Date;
+import java.util.List;
 
 @Document(collection = "projects")
 @Schema(description = "Project entity representing a project in the system")
@@ -73,5 +74,31 @@ public class Project {
     @Schema(description = "Timestamp when the project was last updated")
     @Field("updated_at")
     private Instant updatedAt;
+
+
+    @Schema(description = "Short introduction for guests or project overview",
+            example = "Ứng dụng ngân hàng di động giúp người dùng chuyển tiền nhanh chóng và an toàn.",
+            nullable = true)
+    @Field("short_intro")
+    private String shortIntro;
+
+    @Schema(description = "Highlighted achievements or key selling point",
+            example = "Hơn 10.000 người dùng trong tháng đầu ra mắt.",
+            nullable = true)
+    @Field("highlight")
+    private String highlight;
+
+    @Schema(description = "Demo URL for guests to explore or view the product",
+            example = "https://demo.mybankapp.com",
+            nullable = true)
+    @Field("demo_url")
+    private String demoUrl;
+
+    @Schema(description = "List of screenshot image URLs for project showcase",
+            example = "[\"https://cdn.example.com/screen1.png\", \"https://cdn.example.com/screen2.png\"]",
+            nullable = true)
+    @Field("screenshots")
+    private List<String> screenshots;
+
 
 }

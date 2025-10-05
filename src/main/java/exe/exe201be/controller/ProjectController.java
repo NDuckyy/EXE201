@@ -94,13 +94,13 @@ public class ProjectController {
                             schema = @Schema(implementation = APIResponse.class))
             )
     })
-    public APIResponse<?> createProject(@RequestBody CreateProjectRequest createProject, @AuthenticationPrincipal Jwt jwt, HttpServletResponse httpServletResponse) {
-        APIResponse<?> response = new APIResponse<>();
-        ObjectId id = new ObjectId(jwt.getSubject());
-        projectService.createProject(createProject, id, httpServletResponse);
-        response.setMessage("Create project success");
-        return response;
-    }
+        public APIResponse<?> createProject(@RequestBody CreateProjectRequest createProject, @AuthenticationPrincipal Jwt jwt, HttpServletResponse httpServletResponse) {
+            APIResponse<?> response = new APIResponse<>();
+            ObjectId id = new ObjectId(jwt.getSubject());
+            projectService.createProject(createProject, id, httpServletResponse);
+            response.setMessage("Create project success");
+            return response;
+        }
 
     @PostMapping("/{projectId}/members")
     public APIResponse<?> addMemberToProject(@PathVariable String projectId, @RequestBody AddMemberRequest request, HttpServletResponse httpServletResponse) {
