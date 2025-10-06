@@ -15,7 +15,7 @@ public class MailServiceImpl implements  MailService {
     }
 
     public void sendVerificationEmail(String to, String token, String projectId) {
-        String verifyUrl = "http://localhost:8080/api/projects/verify?token=" + token + "&email=" + to + "&projectId=" + projectId;
+        String verifyUrl = "https://foundershub.nducky.id.vn/api/projects/verify?token=" + token + "&email=" + to + "&projectId=" + projectId;
 
         try {
             MimeMessage message = mailSender.createMimeMessage();
