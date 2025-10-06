@@ -165,14 +165,14 @@ public class ProjectController {
                             schema = @Schema(implementation = Project.class))
             )
     })
-    public APIResponse<List<ProjectResponse>> getMyProjects(@AuthenticationPrincipal Jwt jwt) {
+    public APIResponse<List<ProjectResponse>> getMyProjects(@AuthenticationPrincipal Jwt jwt, HttpServletResponse httpServletResponse) {
         APIResponse<List<ProjectResponse>> response = new APIResponse<>();
         if( jwt == null ) {
             throw new AppException(ErrorCode.UNAUTHORIZED);
         }
         ObjectId userId = new ObjectId(jwt.getSubject());
         response.setMessage("Success");
-        response.setData(projectService.getProjectsByUserId(userId));
+        response.setData(projectService.getProjectsByUserId(userId, httpServletResponse));
         return response;
     }
 }

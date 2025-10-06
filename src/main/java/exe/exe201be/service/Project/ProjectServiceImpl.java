@@ -284,7 +284,7 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
-    public List<ProjectResponse> getProjectsByUserId(ObjectId userId) {
+    public List<ProjectResponse> getProjectsByUserId(ObjectId userId, HttpServletResponse httpServletResponse) {
         User user = userRepository.findById(userId).orElse(null);
         if (user == null) {
             throw new AppException(ErrorCode.USER_NOT_FOUND);
@@ -299,6 +299,8 @@ public class ProjectServiceImpl implements ProjectService {
 
         Map<ObjectId, Project> project = projectRepository.findAllById(projectIds).stream()
                 .collect(Collectors.toMap(Project::getId, Function.identity()));
+
+        String token = authorityService.refreshUserToken(user, httpServletResponse);
 
         return projectUsers.stream()
                 .map(pu -> {

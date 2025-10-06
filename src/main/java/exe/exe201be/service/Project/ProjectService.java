@@ -26,5 +26,5 @@ public interface ProjectService {
 
     SearchResponse<ProjectResponse> searchProjects(SearchRequest request);
 
-    List<ProjectResponse> getProjectsByUserId(ObjectId userId);
+    List<ProjectResponse> getProjectsByUserId(ObjectId userId, HttpServletResponse httpServletResponse);
 }
