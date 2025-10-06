@@ -247,6 +247,14 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public void sendInvitationEmail(String email, String projectId) {
+        User user = userRepository.findByEmail(email);
+        if (user == null) {
+            throw new AppException(ErrorCode.USER_NOT_FOUND);
+        }
+        Project project = projectRepository.findById(new ObjectId(projectId)).orElse(null);
+        if (project == null) {
+            throw new AppException(ErrorCode.PROJECT_NOT_FOUND);
+        }
         String token = jwtTokenGenerator.generateEmailVerifyToken(email);
 
         mailService.sendVerificationEmail(email, token, projectId);
