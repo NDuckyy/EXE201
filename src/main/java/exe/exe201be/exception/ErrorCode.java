@@ -25,6 +25,10 @@ public enum ErrorCode {
     USER_ALREADY_IN_PROJECT(409, "User already in project"),
     USER_ALREADY_A_SERVICE_PROVIDER(409, "Provider role is inactive please contact admin"),
     PAYMENT_NOT_FOUND(404, "Payment not found"),
+    TOKEN_EXPIRED(401, "Token expired"),
+    INVALID_TOKEN(401, "Invalid token"),
+    UNAUTHORIZED(401, "Unauthorized"),
+
     ;
     ErrorCode(int code, String message) {
         this.code = code;

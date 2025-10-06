@@ -1,5 +1,6 @@
 package exe.exe201be.service.Project;
 
+import com.nimbusds.jwt.SignedJWT;
 import exe.exe201be.dto.request.ChangeStatusRequest;
 import exe.exe201be.dto.request.CreateProjectRequest;
 import exe.exe201be.dto.request.SearchRequest;
@@ -12,6 +13,8 @@ import exe.exe201be.pojo.*;
 import exe.exe201be.pojo.type.Status;
 import exe.exe201be.repository.*;
 import exe.exe201be.service.Authority.AuthorityService;
+import exe.exe201be.service.Mail.MailService;
+import exe.exe201be.utils.JwtTokenGenerator;
 import jakarta.servlet.http.HttpServletResponse;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,6 +48,12 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Autowired
     private AuthorityService authorityService;
+
+    @Autowired
+    private JwtTokenGenerator jwtTokenGenerator;
+
+    @Autowired
+    private MailService mailService;
 
 
     @Override
@@ -217,6 +226,33 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
+    public void verifyEmail(String token, String email, String projectId) {
+        try {
+            SignedJWT jwt = SignedJWT.parse(token);
+            Date exp = jwt.getJWTClaimsSet().getExpirationTime();
+
+            if (exp.before(new Date())) {
+                throw new AppException(ErrorCode.TOKEN_EXPIRED);
+            }
+
+            User user = userRepository.findByEmail(email);
+            if (user == null) throw new AppException(ErrorCode.USER_NOT_FOUND);
+            ObjectId projectObjId = new ObjectId(projectId);
+            addMemberToProject(projectObjId, email);
+
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+    }
+
+    @Override
+    public void sendInvitationEmail(String email, String projectId) {
+        String token = jwtTokenGenerator.generateEmailVerifyToken(email);
+
+        mailService.sendVerificationEmail(email, token, projectId);
+    }
+
+    @Override
     public SearchResponse<ProjectResponse> searchProjects(SearchRequest request) {
         Pageable pageable = PageRequest.of(
                 request.getPage() - 1,
@@ -237,5 +273,32 @@ public class ProjectServiceImpl implements ProjectService {
         } else {
             throw new AppException(ErrorCode.PROJECT_NOT_FOUND);
         }
+    }
+
+    @Override
+    public List<ProjectResponse> getProjectsByUserId(ObjectId userId) {
+        User user = userRepository.findById(userId).orElse(null);
+        if (user == null) {
+            throw new AppException(ErrorCode.USER_NOT_FOUND);
+        }
+        List<ProjectUser> projectUsers = projectUserRepository.findByUserId(userId);
+        if (projectUsers.isEmpty()){
+            throw new AppException(ErrorCode.PROJECT_NOT_FOUND);
+        }
+        Set<ObjectId> projectIds = projectUsers.stream()
+                .map(ProjectUser::getProjectId)
+                .collect(Collectors.toSet());
+
+        Map<ObjectId, Project> project = projectRepository.findAllById(projectIds).stream()
+                .collect(Collectors.toMap(Project::getId, Function.identity()));
+
+        return projectUsers.stream()
+                .map(pu -> {
+                    Project p = project.get(pu.getProjectId());
+                    User manager = userRepository.findById(p.getManagerId()).orElse(null);
+                    return getProjectResponse(p, manager);
+                })
+                .collect(Collectors.toList());
+
     }
 }

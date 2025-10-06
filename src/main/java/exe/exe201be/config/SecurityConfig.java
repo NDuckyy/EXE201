@@ -61,15 +61,16 @@ public class SecurityConfig {
                                 "/api/v1/auth/register",
                                 "/api/webhook/sepay",
                                 "/api/payment/create-order",
-                                "api/payment/orders/{id}",
+                                "/api/payment/orders/{id}",
                                 "/api/{projectId}/tasks/{taskId}/comments",
-                                "/api/v1/auth/login").permitAll()
+                                "/api/v1/auth/login",
+                                "/api/projects/send-invite").permitAll()
 
                         .requestMatchers(HttpMethod.GET,
                                 "/api/users/getAllUser").hasAuthority("ADMIN")
 
                         .requestMatchers(HttpMethod.GET,
-                                "api/service-packages",
+                                "/api/service-packages",
                                 "/api/service-packages/*",
                                 "/api/service-providers",
                                 "/api/service-providers/*",
@@ -77,7 +78,8 @@ public class SecurityConfig {
                                 "/api/projects",
                                 "/api/projects/{id}",
                                 "/api/projects/search",
-                                "/api/{projectId}/tasks/{taskId}/comments"
+                                "/api/{projectId}/tasks/{taskId}/comments",
+                                "/api/projects/verify"
                         ).permitAll()
 
                         .requestMatchers(HttpMethod.POST,
@@ -117,7 +119,8 @@ public class SecurityConfig {
 
                         .requestMatchers(HttpMethod.GET,
                                 "/api/{projectId}/tasks",
-                                "/api/{projectId}/tasks/{taskId}").access(this::isProjectMemberOrLeader)
+                                "/api/{projectId}/tasks/{taskId}",
+                                "/api/projects/my-projects").access(this::isProjectMemberOrLeader)
 
                         .requestMatchers(HttpMethod.GET,
                                 "/api/orders/user").hasAuthority("USER")

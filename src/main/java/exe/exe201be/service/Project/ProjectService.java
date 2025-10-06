@@ -20,5 +20,11 @@ public interface ProjectService {
 
     void addMemberToProject(ObjectId projectId, String email);
 
+    void verifyEmail(String token,String email, String projectId);
+
+    void sendInvitationEmail(String email, String projectId);
+
     SearchResponse<ProjectResponse> searchProjects(SearchRequest request);
+
+    List<ProjectResponse> getProjectsByUserId(ObjectId userId);
 }

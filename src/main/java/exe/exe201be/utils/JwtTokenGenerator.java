@@ -69,4 +69,27 @@ public class JwtTokenGenerator {
             throw new RuntimeException("Failed to sign JWT", e);
         }
     }
+
+    public String generateEmailVerifyToken(String email) {
+        try {
+            Instant now = Instant.now();
+            JWTClaimsSet claims = new JWTClaimsSet.Builder()
+                    .subject(email)
+                    .claim("type", "VERIFY_EMAIL")
+                    .issueTime(Date.from(now))
+                    .expirationTime(Date.from(now.plus(Duration.ofDays(30))))
+                    .build();
+
+            JWSHeader header = new JWSHeader.Builder(JWSAlgorithm.HS256)
+                    .type(JOSEObjectType.JWT)
+                    .build();
+
+            SignedJWT signed = new SignedJWT(header, claims);
+            signed.sign(new MACSigner(secret));
+            return signed.serialize();
+        } catch (JOSEException e) {
+            throw new RuntimeException("Failed to sign email verification token", e);
+        }
+    }
+
 }

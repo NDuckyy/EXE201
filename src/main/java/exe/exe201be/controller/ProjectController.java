@@ -7,6 +7,8 @@ import exe.exe201be.dto.request.SearchRequest;
 import exe.exe201be.dto.response.APIResponse;
 import exe.exe201be.dto.response.ProjectResponse;
 import exe.exe201be.dto.response.SearchResponse;
+import exe.exe201be.exception.AppException;
+import exe.exe201be.exception.ErrorCode;
 import exe.exe201be.pojo.Project;
 import exe.exe201be.service.Project.ProjectService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -133,6 +135,44 @@ public class ProjectController {
         SearchRequest searchRequest = new SearchRequest(keyword, page, size, sortBy, sortDir);
         response.setMessage("Search completed successfully");
         response.setData(projectService.searchProjects(searchRequest));
+        return response;
+    }
+
+    @PostMapping("/send-invite")
+    public APIResponse<?> sendInvite(@RequestParam String email, @RequestParam String projectId) {
+        projectService.sendInvitationEmail(email, projectId);
+        APIResponse<?> apiResponse = new APIResponse<>();
+        apiResponse.setMessage("Gửi lời mời thành công. Vui lòng kiểm tra email.");
+        return apiResponse;
+    }
+
+    @GetMapping("/verify")
+    public APIResponse<?> verifyEmail(@RequestParam String token,@RequestParam String email, @RequestParam String projectId) {
+        projectService.verifyEmail(token,email, projectId);
+        APIResponse<?> apiResponse = new APIResponse<>();
+        apiResponse.setMessage("Xác thực email thành công. Bạn có thể đăng nhập ngay bây giờ.");
+        return apiResponse;
+    }
+
+    @GetMapping("/my-projects")
+    @Operation(summary = "Get My Projects", description = "Retrieve a list of projects associated with the authenticated user")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Successful operation",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = Project.class))
+            )
+    })
+    public APIResponse<List<ProjectResponse>> getMyProjects(@AuthenticationPrincipal Jwt jwt) {
+        APIResponse<List<ProjectResponse>> response = new APIResponse<>();
+        if( jwt == null ) {
+            throw new AppException(ErrorCode.UNAUTHORIZED);
+        }
+        ObjectId userId = new ObjectId(jwt.getSubject());
+        response.setMessage("Success");
+        response.setData(projectService.getProjectsByUserId(userId));
         return response;
     }
 }

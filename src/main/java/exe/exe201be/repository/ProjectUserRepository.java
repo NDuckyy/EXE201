@@ -5,9 +5,13 @@ import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @Repository
 public interface ProjectUserRepository extends MongoRepository<ProjectUser, ObjectId> {
     long countByUserId(ObjectId userId);
 
     ProjectUser findByProjectIdAndUserId(ObjectId projectId, ObjectId userId);
+
+    List<ProjectUser> findByUserId(ObjectId userId);
 }
