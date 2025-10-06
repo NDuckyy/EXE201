@@ -8,18 +8,10 @@ spring:
     multipart:
       max-file-size: 10MB
       max-request-size: 10MB
-  mail:
-    host: smtp.gmail.com
-    port: 587
-    username: crew.foundershub@gmail.com
-    password: hvwa bqob hzgj joze
-    properties:
-      mail:
-        smtp:
-          auth: true
-          starttls:
-            enable: true
-    default-encoding: UTF-8
+
+resend:
+  api-key: re_ExP57fG1_FJ3MpmjMbRCa5qXhp8te1zp7
+  from: "FoundersHub <noreply@foundershub.nducky.id.vn>"
 
 myapp:
   api-key: 143GuUEp5z3lw3musZsuB97H4qAwEXS9lp62AfK9WcU=
