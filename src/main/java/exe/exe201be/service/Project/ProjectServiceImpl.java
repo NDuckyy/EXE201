@@ -224,7 +224,7 @@ public class ProjectServiceImpl implements ProjectService {
         userProjectRepository.save(userProjectRole);
 
     }
-
+    
     @Override
     public void verifyEmail(String token, String email, String projectId) {
         try {

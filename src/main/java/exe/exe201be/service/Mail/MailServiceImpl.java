@@ -21,7 +21,7 @@ public class MailServiceImpl implements MailService {
 
     @Override
     public void sendVerificationEmail(String to, String token, String projectId) {
-        String verifyUrl = "https://foundershub.nducky.id.vn/api/projects/verify?token=" + token + "&email=" + to + "&projectId=" + projectId;
+        String verifyUrl = "http://localhost:3000/workspace/verify?token=" + token + "&email=" + to + "&projectId=" + projectId;
 
         String htmlContent = """
                 <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 600px; margin: auto;
@@ -50,7 +50,7 @@ public class MailServiceImpl implements MailService {
                     </div>
                     <div style="background-color: #f5f5f5; color: #777; text-align: center;
                                 padding: 14px; font-size: 13px; border-top: 1px solid #e0e0e0;">
-                        <p style="margin: 4px 0;">© 2025 FPT Corporation. All rights reserved.</p>
+                        <p style="margin: 4px 0;">© 2025 FoundersHub. All rights reserved.</p>
                         <p style="margin: 0;">Email này được gửi tự động, vui lòng không trả lời.</p>
                     </div>
                 </div>
@@ -60,7 +60,7 @@ public class MailServiceImpl implements MailService {
         Map<String, Object> payload = new HashMap<>();
         payload.put("from", fromEmail);
         payload.put("to", new String[]{to});
-        payload.put("subject", "Xác thực tài khoản của bạn");
+        payload.put("subject", "Thư mời tham gia dự án");
         payload.put("html", htmlContent);
 
         HttpHeaders headers = new HttpHeaders();
