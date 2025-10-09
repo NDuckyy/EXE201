@@ -17,9 +17,6 @@ public class RegisterRequest {
     @NotBlank
     private String fullName;
 
-    private String avatarUrl;
     private String phone;
     private Gender gender;
-    private String address;
-    private String image;
 }
