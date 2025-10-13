@@ -5,6 +5,8 @@ import exe.exe201be.dto.request.SearchRequest;
 import exe.exe201be.dto.response.APIResponse;
 import exe.exe201be.dto.response.SearchResponse;
 import exe.exe201be.dto.response.ServicePackageResponse;
+import exe.exe201be.exception.AppException;
+import exe.exe201be.exception.ErrorCode;
 import exe.exe201be.pojo.ServicePackage;
 import exe.exe201be.service.ServicePackage.ServicePackageService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -142,6 +144,29 @@ public class ServicePackageController {
         ObjectId id = new ObjectId(serviceId);
         response.setMessage("Update service package success");
         response.setData(servicePackageService.updateServicePackage(id, servicePackage));
+        return response;
+    }
+
+    @GetMapping("/by-provider")
+    @Operation(summary = "Get Service Packages by Provider ID", description = "Retrieve all service packages associated with the authenticated provider")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Service packages retrieved successfully",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ServicePackageResponse.class))
+            ),
+    })
+    public APIResponse<List<ServicePackageResponse>> getServicePackagesByProviderId(@AuthenticationPrincipal Jwt jwt) {
+        if( jwt == null ) {
+            throw new AppException(ErrorCode.UNAUTHORIZED);
+        }
+        String providerId = jwt.getSubject();
+        ObjectId id = new ObjectId(providerId);
+        APIResponse<List<ServicePackageResponse>> response = new APIResponse<>();
+        response.setMessage("Get service packages by provider id success");
+        response.setData(servicePackageService.getServicePackagesByProviderId(id));
         return response;
     }
 

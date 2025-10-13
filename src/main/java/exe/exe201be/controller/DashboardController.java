@@ -1,6 +1,7 @@
 package exe.exe201be.controller;
 
 import exe.exe201be.dto.response.APIResponse;
+import exe.exe201be.dto.response.DashboardProviderResponse;
 import exe.exe201be.dto.response.TotalResponse;
 import exe.exe201be.service.Dashboard.DashboardService;
 import org.bson.types.ObjectId;
@@ -24,6 +25,16 @@ public class DashboardController {
         TotalResponse totalResponse = dashboardService.countData(id);
         response.setMessage("Dashboard data retrieved successfully");
         response.setData(totalResponse);
+        return response;
+    }
+
+    @GetMapping("/provider-data")
+    public APIResponse<DashboardProviderResponse> getProviderData(@AuthenticationPrincipal Jwt jwt) {
+        ObjectId id = new ObjectId(jwt.getSubject());
+        APIResponse<DashboardProviderResponse> response = new APIResponse<>();
+        DashboardProviderResponse dashboardProviderResponse = dashboardService.getDashboardProvider(id);
+        response.setMessage("Dashboard data retrieved successfully");
+        response.setData(dashboardProviderResponse);
         return response;
     }
 }

@@ -15,5 +15,6 @@ public interface ServicePackageService {
     ServicePackageResponse createServicePackage(ObjectId providerId,CreateServicePackageRequest servicePackage);
     ServicePackageResponse updateServicePackage(ObjectId id, CreateServicePackageRequest servicePackage);
     void changeStatusServicePackage(String id);
+    List<ServicePackageResponse> getServicePackagesByProviderId(ObjectId providerId);
     SearchResponse<ServicePackageResponse> searchServicePackages(SearchRequest request);
 }

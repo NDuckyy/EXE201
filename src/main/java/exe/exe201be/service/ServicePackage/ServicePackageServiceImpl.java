@@ -152,6 +152,23 @@ public class ServicePackageServiceImpl implements ServicePackageService {
     }
 
     @Override
+    public List<ServicePackageResponse> getServicePackagesByProviderId(ObjectId providerId) {
+        ServiceProvider serviceProvider = serviceProviderRepository.findByUserId(providerId);
+        if (serviceProvider == null) {
+            throw new AppException(ErrorCode.SERVICE_PROVIDER_NOT_FOUND);
+        }
+
+        List<ServicePackage> servicePackages = servicePackageRepository.findByProviderId(serviceProvider.getId());
+        if (servicePackages.isEmpty()) {
+            throw new AppException(ErrorCode.SERVICE_PACKAGE_NOT_FOUND);
+        }
+
+        return servicePackages.stream()
+                .map(sp -> getServicePackageResponse(sp, serviceProvider))
+                .collect(Collectors.toList());
+    }
+
+    @Override
     public SearchResponse<ServicePackageResponse> searchServicePackages(SearchRequest request) {
         Pageable pageable = PageRequest.of(
                 request.getPage() - 1,

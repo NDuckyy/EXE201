@@ -70,6 +70,10 @@ public class SecurityConfig {
                                 "/api/users/getAllUser").hasAuthority("ADMIN")
 
                         .requestMatchers(HttpMethod.GET,
+                                "/api/service-packages/by-provider",
+                                "/api/dashboard/provider-data").hasAuthority("PROVIDER")
+
+                        .requestMatchers(HttpMethod.GET,
                                 "/api/service-packages",
                                 "/api/service-packages/*",
                                 "/api/service-providers",
