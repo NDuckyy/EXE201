@@ -77,7 +77,7 @@ public class ServicePackageServiceImpl implements ServicePackageService {
         }
 
         ServicePackage newServicePackage = ServicePackage.builder()
-                .providerId(providerId)
+                .providerId(serviceProvider.getId())
                 .name(servicePackage.getName())
                 .description(servicePackage.getDescription())
                 .price(servicePackage.getPrice())
