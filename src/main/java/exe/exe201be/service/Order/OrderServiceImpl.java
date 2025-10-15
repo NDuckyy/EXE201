@@ -2,8 +2,10 @@ package exe.exe201be.service.Order;
 
 import exe.exe201be.dto.request.ChangeStatusRequest;
 import exe.exe201be.dto.request.CreateOrderRequest;
+import exe.exe201be.dto.request.SearchRequest;
 import exe.exe201be.dto.response.OrderDetailResponse;
 import exe.exe201be.dto.response.OrderResponse;
+import exe.exe201be.dto.response.SearchResponse;
 import exe.exe201be.dto.response.UserResponse;
 import exe.exe201be.exception.AppException;
 import exe.exe201be.exception.ErrorCode;
@@ -12,6 +14,10 @@ import exe.exe201be.pojo.type.Status;
 import exe.exe201be.repository.*;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -34,6 +40,9 @@ public class OrderServiceImpl implements OrderService {
 
     @Autowired
     private ServicePackageRepository servicePackageRepository;
+
+    @Autowired
+    private ServiceProviderRepository serviceProviderRepository;
 
     @Override
     public List<OrderResponse> getAllOrderByUserId(ObjectId userId) {
@@ -145,4 +154,100 @@ public class OrderServiceImpl implements OrderService {
     public Order findByReferenceCode(String ref) {
         return orderRepository.findByReferenceCode(ref);
     }
+
+    @Override
+    public SearchResponse<OrderResponse> getHistoryOrder(ObjectId userId, SearchRequest req) {
+        // 1) Tìm provider theo user
+        ServiceProvider provider = serviceProviderRepository.findByUserId(userId);
+        if (provider == null) {
+            throw new AppException(ErrorCode.SERVICE_PROVIDER_NOT_FOUND);
+        }
+
+        // 2) Lấy các package của provider
+        List<ObjectId> packageIds = servicePackageRepository.findByProviderId(provider.getId())
+                .stream().map(ServicePackage::getId).toList();
+
+        // 3) Lấy orderIds từ OrderDetail theo các package
+        List<ObjectId> orderIds = orderDetailRepository.findByPackageIdIn(packageIds)
+                .stream().map(OrderDetail::getOrderId).distinct().toList();
+
+        // 4) Nếu không có order -> trả về trang rỗng
+        int page = (req.getPage() <= 0) ? 1 : req.getPage();
+        int size = (req.getSize() <= 0) ? 20 : req.getSize();
+        if (orderIds.isEmpty()) {
+            return SearchResponse.<OrderResponse>builder()
+                    .content(Collections.emptyList())
+                    .totalElements(0)
+                    .totalPages(0)
+                    .page(page)
+                    .size(size)
+                    .build();
+        }
+
+        // 5) Phân trang + sort
+        String sortBy = (req.getSortBy() == null || req.getSortBy().isBlank()) ? "createdAt" : req.getSortBy();
+        Sort.Direction dir = "asc".equalsIgnoreCase(req.getSortDir()) ? Sort.Direction.ASC : Sort.Direction.DESC;
+        Pageable pageable = PageRequest.of(page - 1, size, Sort.by(dir, sortBy));
+
+        // 6) Lấy trang Order theo danh sách orderIds
+        Page<Order> orderPage = orderRepository.findByIdIn(orderIds, pageable);
+        List<Order> orders = orderPage.getContent();
+
+        // 7) Gom userIds & paymentIds từ CHÍNH TRANG NÀY rồi fetch batch
+        Set<ObjectId> userIds = orders.stream()
+                .map(Order::getUserId)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+
+        Map<ObjectId, User> userByIds = userRepository.findAllById(userIds).stream()
+                .collect(Collectors.toMap(User::getId, Function.identity()));
+
+        Set<ObjectId> paymentIds = orders.stream()
+                .map(Order::getPaymentId)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+
+        Map<ObjectId, Payment> paymentMap = paymentRepository.findAllById(paymentIds).stream()
+                .collect(Collectors.toMap(Payment::getId, Function.identity()));
+
+        // 8) Map ra OrderResponse (giống getAll... nhưng theo trang)
+        List<OrderResponse> data = orders.stream().map(o -> {
+            User u = userByIds.get(o.getUserId());
+            Payment p = paymentMap.get(o.getPaymentId());
+
+            UserResponse userResponse = null;
+            if (u != null) {
+                userResponse = UserResponse.builder()
+                        .id(u.getId().toHexString())
+                        .email(u.getEmail())
+                        .fullName(u.getFullName())
+                        .avatarUrl(u.getAvatar_url())
+                        .gender(u.getGender())
+                        .image(u.getImage())
+                        .status(u.getStatus())
+                        .phone(u.getPhone())
+                        .address(u.getAddress())
+                        .build();
+            }
+
+            return OrderResponse.builder()
+                    .id(o.getId() != null ? o.getId().toHexString() : null)
+                    .user(userResponse)
+                    .payment(p)
+                    .total(o.getTotal())
+                    .status(o.getStatus())
+                    .createdAt(o.getCreatedAt() != null ? Date.from(o.getCreatedAt()) : null)
+                    .build();
+        }).toList();
+
+        // 9) Trả về SearchResponse phân trang
+        return SearchResponse.<OrderResponse>builder()
+                .content(data)
+                .totalElements(orderPage.getTotalElements())
+                .totalPages(orderPage.getTotalPages())
+                .page(page)
+                .size(size)
+                .build();
+    }
+
 }

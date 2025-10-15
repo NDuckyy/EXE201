@@ -1,21 +1,29 @@
 package exe.exe201be.service.Dashboard;
 
+import exe.exe201be.dto.request.SearchRequest;
 import exe.exe201be.dto.response.*;
 import exe.exe201be.exception.AppException;
 import exe.exe201be.exception.ErrorCode;
-import exe.exe201be.pojo.Order;
-import exe.exe201be.pojo.OrderDetail;
-import exe.exe201be.pojo.ServicePackage;
-import exe.exe201be.pojo.ServiceProvider;
+import exe.exe201be.pojo.*;
 import exe.exe201be.pojo.type.Status;
 import exe.exe201be.repository.*;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.security.Provider;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 @Service
 public class DashboardServiceImpl implements DashboardService {
@@ -37,6 +45,9 @@ public class DashboardServiceImpl implements DashboardService {
 
     @Autowired
     private OrderDetailRepository orderDetailRepository;
+
+    @Autowired
+    private UserRepository userRepository;
 
     @Override
     public TotalResponse countData(ObjectId userId) {
@@ -123,7 +134,6 @@ public class DashboardServiceImpl implements DashboardService {
                 .toList();
 
 
-
         return DashboardProviderResponse.builder()
                 .totalRevenue(totalRevenue)
                 .totalOrder(totalOrders)
@@ -134,4 +144,113 @@ public class DashboardServiceImpl implements DashboardService {
                 .build();
 
     }
+
+    @Override
+    public List<OrderDashboardResponse> getOrderByMonth(ObjectId userId, int year) {
+        ServiceProvider provider = serviceProviderRepository.findByUserId(userId);
+        if (provider == null) {
+            throw new AppException(ErrorCode.SERVICE_PROVIDER_NOT_FOUND);
+        }
+
+        List<ServicePackage> servicePackages =
+                servicePackageRepository.findByProviderId(provider.getId());
+
+        List<ObjectId> packageIds = servicePackages.stream()
+                .map(ServicePackage::getId)
+                .collect(Collectors.toList());
+
+        List<OrderDetail> orderDetails =
+                orderDetailRepository.findByPackageIdIn(packageIds);
+
+        List<ObjectId> orderIds = orderDetails.stream()
+                .map(OrderDetail::getOrderId)
+                .distinct()
+                .collect(Collectors.toList());
+
+        if (orderIds.isEmpty()) {
+            return IntStream.rangeClosed(1, 12)
+                    .mapToObj(m -> new OrderDashboardResponse(year, m, 0L, 0.0))
+                    .collect(Collectors.toList());
+        }
+
+        ZoneId zone = ZoneId.of("Asia/Ho_Chi_Minh");
+        Instant start = LocalDate.of(year, 1, 1).atStartOfDay(zone).toInstant();
+        Instant end = LocalDate.of(year + 1, 1, 1).atStartOfDay(zone).toInstant();
+
+        List<Order> orders = orderRepository.findByIdInAndCreatedAtBetween(orderIds, start, end);
+
+        orders = orders.stream().filter(o -> o.getStatus() == Status.PAID).toList();
+
+        Map<Integer, List<Order>> byMonth = orders.stream()
+                .collect(Collectors.groupingBy(o ->
+                        LocalDateTime.ofInstant(o.getCreatedAt(), zone).getMonthValue()
+                ));
+
+        return IntStream.rangeClosed(1, 12)
+                .mapToObj(month -> {
+                    List<Order> inMonth = byMonth.getOrDefault(month, Collections.emptyList());
+                    long orderCount = inMonth.size();
+                    double totalAmount = inMonth.stream()
+                            .map(o -> o.getTotal() == null ? 0.0 : o.getTotal())
+                            .mapToDouble(Double::doubleValue)
+                            .sum();
+
+                    return new OrderDashboardResponse(year, month, orderCount, totalAmount);
+                })
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<CountOrderByServiceResponse> CountOrderByServiceAndProvider(ObjectId userId, int year) {
+        ServiceProvider provider = serviceProviderRepository.findByUserId(userId);
+        if (provider == null) {
+            throw new AppException(ErrorCode.SERVICE_PROVIDER_NOT_FOUND);
+        }
+
+        List<ServicePackage> servicePackages =
+                servicePackageRepository.findByProviderId(provider.getId());
+
+        List<ObjectId> packageIds = servicePackages.stream()
+                .map(ServicePackage::getId)
+                .collect(Collectors.toList());
+
+        List<OrderDetail> orderDetails =
+                orderDetailRepository.findByPackageIdIn(packageIds);
+
+        List<ObjectId> orderIds = orderDetails.stream()
+                .map(OrderDetail::getOrderId)
+                .distinct()
+                .collect(Collectors.toList());
+
+        if (orderIds.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        ZoneId zone = ZoneId.of("Asia/Ho_Chi_Minh");
+        Instant start = LocalDate.of(year, 1, 1).atStartOfDay(zone).toInstant();
+        Instant end = LocalDate.of(year + 1, 1, 1).atStartOfDay(zone).toInstant();
+
+        List<Order> orders = orderRepository.findByIdInAndCreatedAtBetween(orderIds, start, end);
+
+        orders = orders.stream().filter(o -> o.getStatus() == Status.PAID).toList();
+
+        List<Order> finalOrders = orders;
+        Map<ObjectId, Long> orderCountByPackage = orderDetails.stream()
+                .filter(od -> finalOrders.stream().anyMatch(o -> o.getId().equals(od.getOrderId())))
+                .collect(Collectors.groupingBy(OrderDetail::getPackageId, Collectors.counting()));
+
+        List<CountOrderByServiceResponse> responses = new ArrayList<>();
+        for (Map.Entry<ObjectId, Long> entry : orderCountByPackage.entrySet()) {
+            ServicePackage servicePackage = servicePackageRepository.findById(entry.getKey()).orElse(null);
+            if (servicePackage != null) {
+                responses.add(new CountOrderByServiceResponse(
+                        servicePackage.getName(),
+                        entry.getValue()
+                ));
+            }
+        }
+
+        return responses;
+    }
+
 }

@@ -1,8 +1,6 @@
 package exe.exe201be.controller;
 
-import exe.exe201be.dto.response.APIResponse;
-import exe.exe201be.dto.response.DashboardProviderResponse;
-import exe.exe201be.dto.response.TotalResponse;
+import exe.exe201be.dto.response.*;
 import exe.exe201be.service.Dashboard.DashboardService;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,7 +8,10 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/dashboard")
@@ -35,6 +36,26 @@ public class DashboardController {
         DashboardProviderResponse dashboardProviderResponse = dashboardService.getDashboardProvider(id);
         response.setMessage("Dashboard data retrieved successfully");
         response.setData(dashboardProviderResponse);
+        return response;
+    }
+
+    @GetMapping("provider-orders-report" )
+    public APIResponse<List<OrderDashboardResponse>> getProviderOrdersReport(@AuthenticationPrincipal Jwt jwt, @RequestParam int year) {
+        ObjectId id = new ObjectId(jwt.getSubject());
+        APIResponse<List<OrderDashboardResponse>> response = new APIResponse<>();
+        List<OrderDashboardResponse> orderDashboardResponses = dashboardService.getOrderByMonth(id, year);
+        response.setMessage("Provider orders report retrieved successfully");
+        response.setData(orderDashboardResponses);
+        return response;
+    }
+
+    @GetMapping("count-order-by-service" )
+    public APIResponse<List<CountOrderByServiceResponse>> getCountOrderByService(@AuthenticationPrincipal Jwt jwt, @RequestParam int year) {
+        ObjectId id = new ObjectId(jwt.getSubject());
+        APIResponse<List<CountOrderByServiceResponse>> response = new APIResponse<>();
+        List<CountOrderByServiceResponse> countOrderByServiceResponses = dashboardService.CountOrderByServiceAndProvider(id, year);
+        response.setMessage("Count order by service retrieved successfully");
+        response.setData(countOrderByServiceResponses);
         return response;
     }
 }

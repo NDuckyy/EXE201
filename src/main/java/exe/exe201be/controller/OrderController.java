@@ -2,8 +2,10 @@ package exe.exe201be.controller;
 
 import exe.exe201be.dto.request.ChangeStatusRequest;
 import exe.exe201be.dto.request.CreateOrderRequest;
+import exe.exe201be.dto.request.SearchRequest;
 import exe.exe201be.dto.response.APIResponse;
 import exe.exe201be.dto.response.OrderResponse;
+import exe.exe201be.dto.response.SearchResponse;
 import exe.exe201be.pojo.Order;
 import exe.exe201be.service.Order.OrderService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -62,7 +64,7 @@ public class OrderController {
         ObjectId id = new ObjectId(jwt.getSubject());
         ObjectId servicePackageObjId = new ObjectId(createOrderRequest.getServicePackageId());
         APIResponse<?> response = new APIResponse<>();
-        Order order =  orderService.createOrder(id, servicePackageObjId, createOrderRequest);
+        Order order = orderService.createOrder(id, servicePackageObjId, createOrderRequest);
         response.setMessage("Create order successfully");
         return response;
     }
@@ -84,6 +86,22 @@ public class OrderController {
         APIResponse<?> response = new APIResponse<>();
         orderService.updateStatusOrder(orderObjId, status);
         response.setMessage("Update order status successfully");
+        return response;
+    }
+
+
+    @GetMapping("/get-history-order")
+    public APIResponse<SearchResponse<OrderResponse>> getHistoryOrder(@AuthenticationPrincipal Jwt jwt,
+                                                            @RequestParam(defaultValue = "1") int page,
+                                                            @RequestParam(defaultValue = "20") int size,
+                                                            @RequestParam(defaultValue = "createdAt") String sortBy,
+                                                            @RequestParam(defaultValue = "desc") String sortDir) {
+        ObjectId id = new ObjectId(jwt.getSubject());
+        APIResponse<SearchResponse<OrderResponse>> response = new APIResponse<>();
+        SearchRequest req = new SearchRequest(page, size, sortBy, sortDir);
+        SearchResponse<OrderResponse> orderResponses = orderService.getHistoryOrder(id, req);
+        response.setMessage("History order retrieved successfully");
+        response.setData(orderResponses);
         return response;
     }
 }

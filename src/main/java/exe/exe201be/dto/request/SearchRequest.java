@@ -13,4 +13,11 @@ public class SearchRequest {
     int size;
     String sortBy;
     String sortDir;
+
+    public SearchRequest(int page, int size, String sortBy, String sortDir) {
+        this.page = page;
+        this.size = size;
+        this.sortBy = sortBy;
+        this.sortDir = sortDir;
+    }
 }

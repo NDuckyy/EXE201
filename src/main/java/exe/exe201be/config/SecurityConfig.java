@@ -71,7 +71,10 @@ public class SecurityConfig {
 
                         .requestMatchers(HttpMethod.GET,
                                 "/api/service-packages/by-provider",
-                                "/api/dashboard/provider-data").hasAuthority("PROVIDER")
+                                "/api/dashboard/provider-data",
+                                "/api/dashboard/provider-orders-report",
+                                "/api/dashboard/count-order-by-service",
+                                "/api/orders/get-history-order").hasAuthority("PROVIDER")
 
                         .requestMatchers(HttpMethod.GET,
                                 "/api/service-packages",

@@ -2,8 +2,10 @@ package exe.exe201be.service.Order;
 
 import exe.exe201be.dto.request.ChangeStatusRequest;
 import exe.exe201be.dto.request.CreateOrderRequest;
+import exe.exe201be.dto.request.SearchRequest;
 import exe.exe201be.dto.response.OrderDetailResponse;
 import exe.exe201be.dto.response.OrderResponse;
+import exe.exe201be.dto.response.SearchResponse;
 import exe.exe201be.pojo.Order;
 import exe.exe201be.pojo.OrderDetail;
 import org.bson.types.ObjectId;
@@ -23,4 +25,7 @@ public interface OrderService {
     Optional<Order> getOrderById(ObjectId orderId);
 
   Order findByReferenceCode(String ref);
+
+    SearchResponse<OrderResponse> getHistoryOrder(ObjectId userId, SearchRequest searchRequest);
+
 }

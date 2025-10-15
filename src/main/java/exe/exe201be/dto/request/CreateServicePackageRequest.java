@@ -45,7 +45,4 @@ public class CreateServicePackageRequest {
     @Schema(description = "Image URL", example = "https://example.com/image.jpg")
     private String image;
 
-    @Schema(description = "status", example = "active")
-    private Status status;
-
 }

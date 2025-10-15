@@ -1,8 +1,11 @@
 package exe.exe201be.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import exe.exe201be.pojo.Payment;
 import exe.exe201be.pojo.type.Status;
+import io.swagger.v3.core.util.Json;
 import lombok.*;
 
 import java.util.Date;
@@ -12,6 +15,7 @@ import java.util.Date;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class OrderResponse {
     private String id;
     private UserResponse user;
