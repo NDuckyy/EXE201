@@ -193,6 +193,15 @@ public class ServicePackageServiceImpl implements ServicePackageService {
         }
     }
 
+    @Override
+    public void deleteServicePackage(ObjectId id) {
+        ServicePackage servicePackage = servicePackageRepository.findById(id).orElse(null);
+        if (servicePackage == null) {
+            throw new AppException(ErrorCode.SERVICE_PACKAGE_NOT_FOUND);
+        }
+        servicePackageRepository.deleteById(id);
+    }
+
     private ServicePackageResponse getServicePackageResponse(ServicePackage sp, ServiceProvider provider) {
         ServiceProviderResponse providerResponse = (provider == null) ? null :
                 ServiceProviderResponse.builder()

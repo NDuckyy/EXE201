@@ -17,4 +17,6 @@ public interface ServicePackageService {
     void changeStatusServicePackage(String id);
     List<ServicePackageResponse> getServicePackagesByProviderId(ObjectId providerId);
     SearchResponse<ServicePackageResponse> searchServicePackages(SearchRequest request);
+
+    void deleteServicePackage(ObjectId id);
 }

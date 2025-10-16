@@ -76,6 +76,9 @@ public class SecurityConfig {
                                 "/api/dashboard/count-order-by-service",
                                 "/api/orders/get-history-order").hasAuthority("PROVIDER")
 
+                        .requestMatchers(HttpMethod.DELETE,
+                                "/api/service-packages/{id}").hasAuthority("PROVIDER")
+
                         .requestMatchers(HttpMethod.GET,
                                 "/api/service-packages",
                                 "/api/service-packages/*",

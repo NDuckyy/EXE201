@@ -170,5 +170,14 @@ public class ServicePackageController {
         return response;
     }
 
+    @DeleteMapping("/{id}")
+    public APIResponse<?> deleteServicePackage(@PathVariable String id) {
+        APIResponse<?> response = new APIResponse<>();
+        ObjectId idObj = new ObjectId(id);
+        servicePackageService.deleteServicePackage(idObj);
+        response.setMessage("Delete service package success");
+        return response;
+    }
+
 
 }
