@@ -50,10 +50,10 @@ public class DashboardController {
     }
 
     @GetMapping("count-order-by-service" )
-    public APIResponse<List<CountOrderByServiceResponse>> getCountOrderByService(@AuthenticationPrincipal Jwt jwt, @RequestParam int year) {
+    public APIResponse<List<CountOrderByServiceResponse>> getCountOrderByService(@AuthenticationPrincipal Jwt jwt) {
         ObjectId id = new ObjectId(jwt.getSubject());
         APIResponse<List<CountOrderByServiceResponse>> response = new APIResponse<>();
-        List<CountOrderByServiceResponse> countOrderByServiceResponses = dashboardService.CountOrderByServiceAndProvider(id, year);
+        List<CountOrderByServiceResponse> countOrderByServiceResponses = dashboardService.CountOrderByServiceAndProvider(id);
         response.setMessage("Count order by service retrieved successfully");
         response.setData(countOrderByServiceResponses);
         return response;

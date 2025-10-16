@@ -201,7 +201,7 @@ public class DashboardServiceImpl implements DashboardService {
     }
 
     @Override
-    public List<CountOrderByServiceResponse> CountOrderByServiceAndProvider(ObjectId userId, int year) {
+    public List<CountOrderByServiceResponse> CountOrderByServiceAndProvider(ObjectId userId) {
         ServiceProvider provider = serviceProviderRepository.findByUserId(userId);
         if (provider == null) {
             throw new AppException(ErrorCode.SERVICE_PROVIDER_NOT_FOUND);
@@ -226,28 +226,29 @@ public class DashboardServiceImpl implements DashboardService {
             return Collections.emptyList();
         }
 
-        ZoneId zone = ZoneId.of("Asia/Ho_Chi_Minh");
-        Instant start = LocalDate.of(year, 1, 1).atStartOfDay(zone).toInstant();
-        Instant end = LocalDate.of(year + 1, 1, 1).atStartOfDay(zone).toInstant();
+        // ✅ Không lọc theo năm, lấy tất cả đơn hàng của provider
+        List<Order> orders = orderRepository.findByIdIn(orderIds);
 
-        List<Order> orders = orderRepository.findByIdInAndCreatedAtBetween(orderIds, start, end);
-
-        orders = orders.stream().filter(o -> o.getStatus() == Status.PAID).toList();
+        // Chỉ lấy đơn hàng đã thanh toán
+        orders = orders.stream()
+                .filter(o -> o.getStatus() == Status.PAID)
+                .toList();
 
         List<Order> finalOrders = orders;
+
         Map<ObjectId, Long> orderCountByPackage = orderDetails.stream()
                 .filter(od -> finalOrders.stream().anyMatch(o -> o.getId().equals(od.getOrderId())))
                 .collect(Collectors.groupingBy(OrderDetail::getPackageId, Collectors.counting()));
 
         List<CountOrderByServiceResponse> responses = new ArrayList<>();
+
         for (Map.Entry<ObjectId, Long> entry : orderCountByPackage.entrySet()) {
-            ServicePackage servicePackage = servicePackageRepository.findById(entry.getKey()).orElse(null);
-            if (servicePackage != null) {
-                responses.add(new CountOrderByServiceResponse(
-                        servicePackage.getName(),
-                        entry.getValue()
-                ));
-            }
+            servicePackageRepository.findById(entry.getKey()).ifPresent(servicePackage ->
+                    responses.add(new CountOrderByServiceResponse(
+                            servicePackage.getName(),
+                            entry.getValue()
+                    ))
+            );
         }
 
         return responses;

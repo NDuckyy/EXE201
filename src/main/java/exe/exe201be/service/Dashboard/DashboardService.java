@@ -14,6 +14,6 @@ public interface DashboardService {
 
     List<OrderDashboardResponse> getOrderByMonth(ObjectId managerId, int year);
 
-    List<CountOrderByServiceResponse> CountOrderByServiceAndProvider(ObjectId userId, int year);
+    List<CountOrderByServiceResponse> CountOrderByServiceAndProvider(ObjectId userId);
 
 }
