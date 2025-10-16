@@ -1,6 +1,7 @@
 package exe.exe201be.repository;
 
 import exe.exe201be.pojo.ServicePackage;
+import exe.exe201be.pojo.type.Status;
 import org.bson.types.ObjectId;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -16,4 +17,6 @@ public interface ServicePackageRepository extends MongoRepository<ServicePackage
     List<ServicePackage> findByProviderId(ObjectId objectId);
 
     Integer countByProviderId(ObjectId providerId);
+
+    Page<ServicePackage> findByNameContainingIgnoreCaseAndStatus(String keyword, Status status, Pageable pageable);
 }

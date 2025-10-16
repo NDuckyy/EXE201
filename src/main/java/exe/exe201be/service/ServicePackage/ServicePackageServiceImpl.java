@@ -174,7 +174,7 @@ public class ServicePackageServiceImpl implements ServicePackageService {
                 request.getPage() - 1,
                 request.getSize(),
                 Sort.by(Sort.Direction.fromString(request.getSortDir()), request.getSortBy()));
-        Page<ServicePackage> servicePackages = servicePackageRepository.findByNameContainingIgnoreCase(request.getKeyword(), pageable);
+        Page<ServicePackage> servicePackages = servicePackageRepository.findByNameContainingIgnoreCaseAndStatus(request.getKeyword(),Status.ACTIVE, pageable);
 
         if (servicePackages.hasContent()) {
             return SearchResponse.<ServicePackageResponse>builder()
