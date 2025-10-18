@@ -16,10 +16,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.security.Provider;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
+import java.time.*;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -48,6 +45,9 @@ public class DashboardServiceImpl implements DashboardService {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private ProjectRepository projectRepository;
 
     @Override
     public TotalResponse countData(ObjectId userId) {
@@ -301,6 +301,97 @@ public class DashboardServiceImpl implements DashboardService {
         resp.setTotalRevenue(totalRevenue);
         resp.setCountUserByQuarter(countUserByQuarter);
         return resp;
+    }
+
+    @Override
+    public ProjectDashboardResponse getProjectDashboard() {
+        // Lấy toàn bộ để tính trung bình & fallback created time
+        // (Nếu dữ liệu lớn, bạn có thể chuyển sang aggregate trên DB)
+        List<Project> projects = projectRepository.findAll();
+
+        long total = projects.size();
+
+        // Đếm Active / Completed theo status
+        long active = projects.stream()
+                .filter(p -> p.getStatus() == Status.ACTIVE)
+                .count();
+
+        long completed = projects.stream()
+                .filter(p -> p.getStatus() == Status.COMPLETED)
+                .count();
+
+        // Avg progress (bỏ null)
+        double avgProgress = projects.stream()
+                .map(Project::getProgress)
+                .filter(Objects::nonNull)
+                .mapToDouble(Double::doubleValue)
+                .average()
+                .orElse(0.0);
+
+        // New projects this month
+        YearMonth nowYm = YearMonth.now();
+        long newThisMonth = projects.stream()
+                .filter(p -> {
+                    LocalDate createdDate = resolveCreatedDate(p);
+                    YearMonth ym = YearMonth.from(createdDate);
+                    return ym.equals(nowYm);
+                })
+                .count();
+
+        return ProjectDashboardResponse.builder()
+                .totalProjects(total)
+                .newProjectsThisMonth(newThisMonth)
+                .avgProjectProgress(avgProgress)
+                .activeProjects(active)
+                .completedProjects(completed)
+                .build();
+    }
+
+    public List<MonthlyProjectPoint> getMonthlyProjectTrend(int monthsBack) {
+        if (monthsBack < 1) monthsBack = 6;
+
+        // Lấy toàn bộ projects (nếu về sau quá lớn -> dùng aggregation ở DB)
+        List<Project> projects = projectRepository.findAll();
+
+        // Gom theo YearMonth của thời điểm tạo
+        Map<YearMonth, Long> counts = projects.stream()
+                .map(this::resolveCreatedDate)          // LocalDate
+                .map(YearMonth::from)                   // YearMonth
+                .collect(Collectors.groupingBy(
+                        Function.identity(),
+                        Collectors.counting()
+                ));
+
+        // Dải thời gian cần trả về: monthsBack gần nhất, theo thứ tự tăng dần
+        YearMonth now = YearMonth.now();
+        YearMonth start = now.minusMonths(monthsBack - 1);
+
+        List<MonthlyProjectPoint> series = new ArrayList<>();
+        YearMonth cursor = start;
+        while (!cursor.isAfter(now)) {
+            long c = counts.getOrDefault(cursor, 0L);
+            series.add(MonthlyProjectPoint.builder()
+                    .year(cursor.getYear())
+                    .month(cursor.getMonthValue())   // 1..12
+                    .created(c)
+                    .build());
+            cursor = cursor.plusMonths(1);
+        }
+
+        return series;
+    }
+
+    /** Ưu tiên field createdAt nếu có; nếu không suy ra từ ObjectId (Mongo) */
+    private LocalDate resolveCreatedDate(Project p) {
+        if (p.getCreatedAt() != null) {
+            return p.getCreatedAt()
+                    .atZone(ZoneId.systemDefault())
+                    .toLocalDate();
+        }
+        // fallback từ ObjectId
+        ObjectId id = p.getId();
+        Instant created = Instant.ofEpochSecond(id.getTimestamp());
+        return created.atZone(ZoneId.systemDefault()).toLocalDate();
     }
 
 }

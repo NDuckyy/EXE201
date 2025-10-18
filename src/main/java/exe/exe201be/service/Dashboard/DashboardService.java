@@ -18,4 +18,8 @@ public interface DashboardService {
 
     DashboardAdminResponse getDashboardAdmin();
 
+    ProjectDashboardResponse getProjectDashboard();
+
+    List<MonthlyProjectPoint> getMonthlyProjectTrend(int monthsBack);
+
 }

@@ -67,4 +67,25 @@ public class DashboardController {
         response.setData(dashboardAdminResponse);
         return response;
     }
+
+    @GetMapping("/admin-data-project")
+    public APIResponse<ProjectDashboardResponse> getProjectDashboard() {
+        APIResponse<ProjectDashboardResponse> res = new APIResponse<>();
+        ProjectDashboardResponse data = dashboardService.getProjectDashboard();
+        res.setMessage("Fetched project dashboard successfully");
+        res.setData(data);
+        return res;
+    }
+
+    @GetMapping("/projects/monthly-trend")
+    public APIResponse<List<MonthlyProjectPoint>> getMonthlyTrend(
+            @RequestParam(defaultValue = "6") int months // ví dụ 6 tháng gần nhất
+    ) {
+        APIResponse<List<MonthlyProjectPoint>> res = new APIResponse<>();
+        List<MonthlyProjectPoint> data = dashboardService.getMonthlyProjectTrend(months);
+        res.setCode(200);
+        res.setMessage("Fetched monthly project trend successfully");
+        res.setData(data);
+        return res;
+    }
 }
