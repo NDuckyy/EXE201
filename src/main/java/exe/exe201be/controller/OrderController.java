@@ -92,15 +92,38 @@ public class OrderController {
 
     @GetMapping("/get-history-order")
     public APIResponse<SearchResponse<OrderResponse>> getHistoryOrder(@AuthenticationPrincipal Jwt jwt,
-                                                            @RequestParam(defaultValue = "1") int page,
-                                                            @RequestParam(defaultValue = "20") int size,
-                                                            @RequestParam(defaultValue = "createdAt") String sortBy,
-                                                            @RequestParam(defaultValue = "desc") String sortDir) {
+                                                                      @RequestParam(defaultValue = "1") int page,
+                                                                      @RequestParam(defaultValue = "20") int size,
+                                                                      @RequestParam(defaultValue = "createdAt") String sortBy,
+                                                                      @RequestParam(defaultValue = "desc") String sortDir) {
         ObjectId id = new ObjectId(jwt.getSubject());
         APIResponse<SearchResponse<OrderResponse>> response = new APIResponse<>();
         SearchRequest req = new SearchRequest(page, size, sortBy, sortDir);
         SearchResponse<OrderResponse> orderResponses = orderService.getHistoryOrder(id, req);
         response.setMessage("History order retrieved successfully");
+        response.setData(orderResponses);
+        return response;
+    }
+
+    @GetMapping("/all-orders")
+    @Operation(summary = "Get All Orders", description = "Retrieve all orders with pagination and sorting")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "All orders retrieved successfully",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = SearchResponse.class))
+            )
+    })
+    public APIResponse<SearchResponse<OrderResponse>> getAllOrders(@RequestParam(defaultValue = "1") int page,
+                                                                   @RequestParam(defaultValue = "20") int size,
+                                                                   @RequestParam(defaultValue = "createdAt") String sortBy,
+                                                                   @RequestParam(defaultValue = "desc") String sortDir) {
+        APIResponse<SearchResponse<OrderResponse>> response = new APIResponse<>();
+        SearchRequest searchRequest = new SearchRequest(page, size, sortBy, sortDir);
+        SearchResponse<OrderResponse> orderResponses = orderService.getAllOrders(searchRequest);
+        response.setMessage("All orders retrieved successfully");
         response.setData(orderResponses);
         return response;
     }

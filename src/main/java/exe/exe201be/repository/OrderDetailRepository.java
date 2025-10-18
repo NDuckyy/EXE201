@@ -13,4 +13,6 @@ public interface OrderDetailRepository extends MongoRepository<OrderDetail, Obje
     Collection<Object> findByPackageId(ObjectId id);
 
     List<OrderDetail> findByPackageIdIn(List<ObjectId> collect);
+
+    OrderDetail findByOrderId(ObjectId id);
 }

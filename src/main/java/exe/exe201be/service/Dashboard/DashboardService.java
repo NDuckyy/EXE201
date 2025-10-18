@@ -16,4 +16,6 @@ public interface DashboardService {
 
     List<CountOrderByServiceResponse> CountOrderByServiceAndProvider(ObjectId userId);
 
+    DashboardAdminResponse getDashboardAdmin();
+
 }

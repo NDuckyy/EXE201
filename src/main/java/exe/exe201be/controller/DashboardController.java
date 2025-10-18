@@ -58,4 +58,13 @@ public class DashboardController {
         response.setData(countOrderByServiceResponses);
         return response;
     }
+
+    @GetMapping("/admin-data")
+    public  APIResponse<DashboardAdminResponse> getDashboardAdmin(){
+        APIResponse<DashboardAdminResponse> response = new APIResponse<>();
+        DashboardAdminResponse dashboardAdminResponse = dashboardService.getDashboardAdmin();
+        response.setMessage("Dashboard data retrieved successfully");
+        response.setData(dashboardAdminResponse);
+        return response;
+    }
 }

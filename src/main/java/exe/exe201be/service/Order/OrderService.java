@@ -24,8 +24,11 @@ public interface OrderService {
 
     Optional<Order> getOrderById(ObjectId orderId);
 
-  Order findByReferenceCode(String ref);
+    Order findByReferenceCode(String ref);
 
     SearchResponse<OrderResponse> getHistoryOrder(ObjectId userId, SearchRequest searchRequest);
+
+    SearchResponse<OrderResponse> getAllOrders(SearchRequest searchRequest);
+
 
 }

@@ -254,4 +254,53 @@ public class DashboardServiceImpl implements DashboardService {
         return responses;
     }
 
+    @Override
+    public DashboardAdminResponse getDashboardAdmin() {
+        long totalUsers = userRepository.count();
+        long totalProjects = projectUserRepository.count();
+
+        // Tính revenue
+        List<Order> orders = orderRepository.findAll();
+        Double totalRevenue = orders.stream()
+                .filter(o -> o.getStatus() == Status.PAID)
+                .mapToDouble(Order::getTotal)
+                .sum();
+
+        // Lấy toàn bộ user
+        List<User> users = userRepository.findAll();
+
+        // Nhóm user theo Year + Quarter
+        Map<String, Long> grouped = users.stream()
+                .filter(u -> u.getCreatedAt() != null)
+                .collect(Collectors.groupingBy(u -> {
+                    LocalDate date = u.getCreatedAt()
+                            .atZone(ZoneId.systemDefault())
+                            .toLocalDate();
+
+                    int year = date.getYear();
+                    int quarter = (date.getMonthValue() - 1) / 3 + 1;
+                    return year + "-Q" + quarter;
+                }, Collectors.counting()));
+
+        // Convert map -> list CountUserByQuarter
+        List<CountUserByQuarter> countUserByQuarter = grouped.entrySet().stream()
+                .map(e -> {
+                    String[] parts = e.getKey().split("-Q");
+                    int year = Integer.parseInt(parts[0]);
+                    int quarter = Integer.parseInt(parts[1]);
+                    return new CountUserByQuarter(year, quarter, e.getValue());
+                })
+                .sorted(Comparator.comparing(CountUserByQuarter::getYear)
+                        .thenComparing(CountUserByQuarter::getQuarter))
+                .toList();
+
+        // Build response
+        DashboardAdminResponse resp = new DashboardAdminResponse();
+        resp.setProjectCount(totalProjects);
+        resp.setUserCount(totalUsers);
+        resp.setTotalRevenue(totalRevenue);
+        resp.setCountUserByQuarter(countUserByQuarter);
+        return resp;
+    }
+
 }

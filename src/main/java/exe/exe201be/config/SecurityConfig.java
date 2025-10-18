@@ -67,7 +67,9 @@ public class SecurityConfig {
                                 "/api/projects/send-invite").permitAll()
 
                         .requestMatchers(HttpMethod.GET,
-                                "/api/users/getAllUser").hasAuthority("ADMIN")
+                                "/api/users/getAllUser",
+                                "/api/orders/all-orders",
+                                "/api/dashboard/admin-data").hasAuthority("ADMIN")
 
                         .requestMatchers(HttpMethod.GET,
                                 "/api/service-packages/by-provider",

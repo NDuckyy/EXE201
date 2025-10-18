@@ -3,10 +3,7 @@ package exe.exe201be.service.Order;
 import exe.exe201be.dto.request.ChangeStatusRequest;
 import exe.exe201be.dto.request.CreateOrderRequest;
 import exe.exe201be.dto.request.SearchRequest;
-import exe.exe201be.dto.response.OrderDetailResponse;
-import exe.exe201be.dto.response.OrderResponse;
-import exe.exe201be.dto.response.SearchResponse;
-import exe.exe201be.dto.response.UserResponse;
+import exe.exe201be.dto.response.*;
 import exe.exe201be.exception.AppException;
 import exe.exe201be.exception.ErrorCode;
 import exe.exe201be.pojo.*;
@@ -233,6 +230,102 @@ public class OrderServiceImpl implements OrderService {
             return OrderResponse.builder()
                     .id(o.getId() != null ? o.getId().toHexString() : null)
                     .user(userResponse)
+                    .payment(p)
+                    .total(o.getTotal())
+                    .status(o.getStatus())
+                    .createdAt(o.getCreatedAt() != null ? Date.from(o.getCreatedAt()) : null)
+                    .build();
+        }).toList();
+
+        // 9) Trả về SearchResponse phân trang
+        return SearchResponse.<OrderResponse>builder()
+                .content(data)
+                .totalElements(orderPage.getTotalElements())
+                .totalPages(orderPage.getTotalPages())
+                .page(page)
+                .size(size)
+                .build();
+    }
+
+    @Override
+    public SearchResponse<OrderResponse> getAllOrders(SearchRequest searchRequest) {
+        // Phân trang + sắp xếp
+        int page = (searchRequest.getPage() <= 0) ? 1 : searchRequest.getPage();
+        int size = (searchRequest.getSize() <= 0) ? 20 : searchRequest.getSize();
+        String sortBy = (searchRequest.getSortBy() == null || searchRequest.getSortBy().isBlank()) ? "createdAt" : searchRequest.getSortBy();
+        Sort.Direction dir = "asc".equalsIgnoreCase(searchRequest.getSortDir()) ? Sort.Direction.ASC : Sort.Direction.DESC;
+        Pageable pageable = PageRequest.of(page - 1, size, Sort.by(dir, sortBy));
+
+        // Lấy trang Order
+        Page<Order> orderPage = orderRepository.findAll(pageable);
+        List<Order> orders = orderPage.getContent();
+
+        // Gom userIds & paymentIds từ CHÍNH TRANG NÀY rồi fetch batch
+        Set<ObjectId> userIds = orders.stream()
+                .map(Order::getUserId)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+
+        Map<ObjectId, User> userByIds = userRepository.findAllById(userIds).stream()
+                .collect(Collectors.toMap(User::getId, Function.identity()));
+
+        Set<ObjectId> paymentIds = orders.stream()
+                .map(Order::getPaymentId)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+
+        Map<ObjectId, Payment> paymentMap = paymentRepository.findAllById(paymentIds).stream()
+                .collect(Collectors.toMap(Payment::getId, Function.identity()));
+
+        // Map ra OrderResponse
+        List<OrderResponse> data = orders.stream().map(o -> {
+            User u = userByIds.get(o.getUserId());
+            Payment p = paymentMap.get(o.getPaymentId());
+            OrderDetail orderDetail = orderDetailRepository.findByOrderId(o.getId());
+            ServicePackage servicePackage = servicePackageRepository.findById(orderDetail.getPackageId()).orElse(null);
+            if(servicePackage == null){
+                System.out.println("Service package not found for orderDetail: " + orderDetail.getId());
+                throw new AppException(ErrorCode.SERVICE_PACKAGE_NOT_FOUND);
+            }
+
+            UserResponse userResponse = null;
+            if (u != null) {
+                userResponse = UserResponse.builder()
+                        .id(u.getId().toHexString())
+                        .email(u.getEmail())
+                        .fullName(u.getFullName())
+                        .avatarUrl(u.getAvatar_url())
+                        .gender(u.getGender())
+                        .image(u.getImage())
+                        .status(u.getStatus())
+                        .phone(u.getPhone())
+                        .address(u.getAddress())
+                        .build();
+            }
+
+            ServicePackageResponse servicePackageResponse = ServicePackageResponse.builder()
+                    .id(servicePackage.getId() != null ? servicePackage.getId().toHexString() : null)
+                    .name(servicePackage.getName())
+                    .description(servicePackage.getDescription())
+                    .price(servicePackage.getPrice())
+                    .status(servicePackage.getStatus())
+                    .build();
+
+            OrderDetailResponse orderDetailResponse = null;
+            if (orderDetail != null) {
+                orderDetailResponse = OrderDetailResponse.builder()
+                        .id(orderDetail.getId() != null ? orderDetail.getId().toHexString() : null)
+                        .orderId(orderDetail.getOrderId() != null ? orderDetail.getOrderId().toHexString() : null)
+                        .servicePackage(servicePackageResponse)
+                        .unit_price(orderDetail.getUnitPrice())
+                        .quantity(orderDetail.getQuantity())
+                        .build();
+            }
+
+            return OrderResponse.builder()
+                    .id(o.getId() != null ? o.getId().toHexString() : null)
+                    .user(userResponse)
+                    .orderDetail(orderDetailResponse)
                     .payment(p)
                     .total(o.getTotal())
                     .status(o.getStatus())
