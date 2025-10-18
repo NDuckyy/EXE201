@@ -211,6 +211,13 @@ public class OrderServiceImpl implements OrderService {
         List<OrderResponse> data = orders.stream().map(o -> {
             User u = userByIds.get(o.getUserId());
             Payment p = paymentMap.get(o.getPaymentId());
+            OrderDetail orderDetail = orderDetailRepository.findByOrderId(o.getId());
+            ServicePackage servicePackage = servicePackageRepository.findById(orderDetail.getPackageId()).orElse(null);
+            if(servicePackage == null){
+                System.out.println("Service package not found for orderDetail: " + orderDetail.getId());
+                throw new AppException(ErrorCode.SERVICE_PACKAGE_NOT_FOUND);
+            }
+
 
             UserResponse userResponse = null;
             if (u != null) {
@@ -227,9 +234,27 @@ public class OrderServiceImpl implements OrderService {
                         .build();
             }
 
+            ServicePackageResponse servicePackageResponse = ServicePackageResponse.builder()
+                    .id(servicePackage.getId() != null ? servicePackage.getId().toHexString() : null)
+                    .name(servicePackage.getName())
+                    .description(servicePackage.getDescription())
+                    .price(servicePackage.getPrice())
+                    .status(servicePackage.getStatus())
+                    .build();
+
+            OrderDetailResponse orderDetailResponse = null;
+            orderDetailResponse = OrderDetailResponse.builder()
+                    .id(orderDetail.getId() != null ? orderDetail.getId().toHexString() : null)
+                    .orderId(orderDetail.getOrderId() != null ? orderDetail.getOrderId().toHexString() : null)
+                    .servicePackage(servicePackageResponse)
+                    .unit_price(orderDetail.getUnitPrice())
+                    .quantity(orderDetail.getQuantity())
+                    .build();
+
             return OrderResponse.builder()
                     .id(o.getId() != null ? o.getId().toHexString() : null)
                     .user(userResponse)
+                    .orderDetail(orderDetailResponse)
                     .payment(p)
                     .total(o.getTotal())
                     .status(o.getStatus())
