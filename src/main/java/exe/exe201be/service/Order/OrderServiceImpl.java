@@ -17,9 +17,14 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 @Service
 public class OrderServiceImpl implements OrderService {
@@ -366,6 +371,51 @@ public class OrderServiceImpl implements OrderService {
                 .page(page)
                 .size(size)
                 .build();
+    }
+
+    @Override
+    public List<MonthlyRevenueResponse> getMonthlyRevenue(int year, String timezone) {
+        // 1) Chốt timezone
+        String tz = (timezone == null || timezone.isBlank()) ? "Asia/Ho_Chi_Minh" : timezone;
+        ZoneId zoneId = ZoneId.of(tz);
+
+        // 2) Khoảng thời gian [01/01/year 00:00, 01/01/(year+1) 00:00) theo TZ
+        ZonedDateTime zStart = LocalDate.of(year, 1, 1).atStartOfDay(zoneId);
+        ZonedDateTime zEnd   = LocalDate.of(year + 1, 1, 1).atStartOfDay(zoneId);
+        Instant from = zStart.toInstant();
+        Instant to   = zEnd.toInstant();
+
+        // 3) Chọn trạng thái tính doanh thu (tuỳ business)
+        List<Status> countedStatuses = List.of(Status.PAID, Status.COMPLETED);
+        // nếu muốn tính cả PENDING thì thêm Status.PENDING
+
+        // 4) Lấy tất cả order trong năm + trạng thái hợp lệ
+        List<Order> orders = orderRepository.findByCreatedAtBetweenAndStatusIn(from, to, countedStatuses);
+        if (orders == null || orders.isEmpty()) {
+            // Trả về đủ 12 tháng = 0 cho đẹp chart
+            return IntStream.rangeClosed(1, 12)
+                    .mapToObj(m -> MonthlyRevenueResponse.builder()
+                            .year(year).month(m).total(0d).build())
+                    .toList();
+        }
+
+        // 5) Group theo tháng theo TZ đã chọn
+        Map<Integer, Double> monthToTotal = orders.stream()
+                .collect(Collectors.groupingBy(
+                        o -> ZonedDateTime.ofInstant(o.getCreatedAt(), zoneId).getMonthValue(),
+                        Collectors.summingDouble(Order::getTotal)
+                ));
+
+        // 6) Fill đủ 12 tháng, sort tăng dần
+        List<MonthlyRevenueResponse> result = IntStream.rangeClosed(1, 12)
+                .mapToObj(m -> MonthlyRevenueResponse.builder()
+                        .year(year)
+                        .month(m)
+                        .total(monthToTotal.getOrDefault(m, 0d))
+                        .build())
+                .toList();
+
+        return result;
     }
 
 }

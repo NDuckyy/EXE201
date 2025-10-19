@@ -25,4 +25,5 @@ public interface OrderRepository extends MongoRepository<Order, ObjectId> {
 
     Page<Order> findByIdIn(List<ObjectId> ids, Pageable pageable);
 
+    List<Order> findByCreatedAtBetweenAndStatusIn(Instant from, Instant to, List<Status> countedStatuses);
 }

@@ -4,6 +4,7 @@ import exe.exe201be.dto.request.ChangeStatusRequest;
 import exe.exe201be.dto.request.CreateOrderRequest;
 import exe.exe201be.dto.request.SearchRequest;
 import exe.exe201be.dto.response.APIResponse;
+import exe.exe201be.dto.response.MonthlyRevenueResponse;
 import exe.exe201be.dto.response.OrderResponse;
 import exe.exe201be.dto.response.SearchResponse;
 import exe.exe201be.pojo.Order;
@@ -125,6 +126,16 @@ public class OrderController {
         SearchResponse<OrderResponse> orderResponses = orderService.getAllOrders(searchRequest);
         response.setMessage("All orders retrieved successfully");
         response.setData(orderResponses);
+        return response;
+    }
+
+    @GetMapping("/admin/monthly-revenue")
+    public APIResponse<List<MonthlyRevenueResponse>> getMonthlyRevenue(@RequestParam  int year) {
+        APIResponse<List<MonthlyRevenueResponse>> response = new APIResponse<>();
+        String timezone = "Asia/Ho_Chi_Minh";
+        List<MonthlyRevenueResponse> monthlyRevenue = orderService.getMonthlyRevenue(year, timezone);
+        response.setMessage("Monthly revenue retrieved successfully");
+        response.setData(monthlyRevenue);
         return response;
     }
 }

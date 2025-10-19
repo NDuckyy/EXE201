@@ -3,6 +3,7 @@ package exe.exe201be.service.Order;
 import exe.exe201be.dto.request.ChangeStatusRequest;
 import exe.exe201be.dto.request.CreateOrderRequest;
 import exe.exe201be.dto.request.SearchRequest;
+import exe.exe201be.dto.response.MonthlyRevenueResponse;
 import exe.exe201be.dto.response.OrderDetailResponse;
 import exe.exe201be.dto.response.OrderResponse;
 import exe.exe201be.dto.response.SearchResponse;
@@ -29,6 +30,8 @@ public interface OrderService {
     SearchResponse<OrderResponse> getHistoryOrder(ObjectId userId, SearchRequest searchRequest);
 
     SearchResponse<OrderResponse> getAllOrders(SearchRequest searchRequest);
+
+    List<MonthlyRevenueResponse> getMonthlyRevenue(int year, String tz);
 
 
 }

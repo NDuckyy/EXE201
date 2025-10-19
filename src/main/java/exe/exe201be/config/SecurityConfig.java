@@ -71,7 +71,8 @@ public class SecurityConfig {
                                 "/api/orders/all-orders",
                                 "/api/dashboard/admin-data",
                                 "/api/dashboard/admin-data-project",
-                                "/api/dashboard/projects/monthly-trend").hasAuthority("ADMIN")
+                                "/api/dashboard/projects/monthly-trend",
+                                "/api/orders/admin/monthly-revenue").hasAuthority("ADMIN")
 
                         .requestMatchers(HttpMethod.GET,
                                 "/api/service-packages/by-provider",
