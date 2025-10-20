@@ -5,6 +5,7 @@ import exe.exe201be.dto.request.ChangeStatusRequest;
 import exe.exe201be.dto.request.CreateProjectRequest;
 import exe.exe201be.dto.request.SearchRequest;
 import exe.exe201be.dto.response.APIResponse;
+import exe.exe201be.dto.response.ProjectLeaderTotalsResponse;
 import exe.exe201be.dto.response.ProjectResponse;
 import exe.exe201be.dto.response.SearchResponse;
 import exe.exe201be.exception.AppException;
@@ -96,13 +97,13 @@ public class ProjectController {
                             schema = @Schema(implementation = APIResponse.class))
             )
     })
-        public APIResponse<?> createProject(@RequestBody CreateProjectRequest createProject, @AuthenticationPrincipal Jwt jwt, HttpServletResponse httpServletResponse) {
-            APIResponse<?> response = new APIResponse<>();
-            ObjectId id = new ObjectId(jwt.getSubject());
-            projectService.createProject(createProject, id, httpServletResponse);
-            response.setMessage("Create project success");
-            return response;
-        }
+    public APIResponse<?> createProject(@RequestBody CreateProjectRequest createProject, @AuthenticationPrincipal Jwt jwt, HttpServletResponse httpServletResponse) {
+        APIResponse<?> response = new APIResponse<>();
+        ObjectId id = new ObjectId(jwt.getSubject());
+        projectService.createProject(createProject, id, httpServletResponse);
+        response.setMessage("Create project success");
+        return response;
+    }
 
     @PostMapping("/{projectId}/members")
     public APIResponse<?> addMemberToProject(@PathVariable String projectId, @RequestBody AddMemberRequest request, HttpServletResponse httpServletResponse) {
@@ -147,8 +148,8 @@ public class ProjectController {
     }
 
     @GetMapping("/verify")
-    public APIResponse<?> verifyEmail(@RequestParam String token,@RequestParam String email, @RequestParam String projectId) {
-        projectService.verifyEmail(token,email, projectId);
+    public APIResponse<?> verifyEmail(@RequestParam String token, @RequestParam String email, @RequestParam String projectId) {
+        projectService.verifyEmail(token, email, projectId);
         APIResponse<?> apiResponse = new APIResponse<>();
         apiResponse.setMessage("Xác thực email thành công. Bạn có thể đăng nhập ngay bây giờ.");
         return apiResponse;
@@ -167,12 +168,26 @@ public class ProjectController {
     })
     public APIResponse<List<ProjectResponse>> getMyProjects(@AuthenticationPrincipal Jwt jwt, HttpServletResponse httpServletResponse) {
         APIResponse<List<ProjectResponse>> response = new APIResponse<>();
-        if( jwt == null ) {
+        if (jwt == null) {
             throw new AppException(ErrorCode.UNAUTHORIZED);
         }
         ObjectId userId = new ObjectId(jwt.getSubject());
         response.setMessage("Success");
         response.setData(projectService.getProjectsByUserId(userId, httpServletResponse));
         return response;
+    }
+
+
+    @GetMapping("/user/dashboard")
+    public APIResponse<ProjectLeaderTotalsResponse> getLeaderTotals(@AuthenticationPrincipal Jwt jwt) {
+        if (jwt == null) throw new AppException(ErrorCode.UNAUTHORIZED);
+        ObjectId userId = new ObjectId(jwt.getSubject());
+
+        ProjectLeaderTotalsResponse data = projectService.getLeaderTotals(userId);
+
+        APIResponse<ProjectLeaderTotalsResponse> res = new APIResponse<>();
+        res.setMessage("Fetch leader totals successfully");
+        res.setData(data);
+        return res;
     }
 }

@@ -3,6 +3,7 @@ package exe.exe201be.service.Project;
 import exe.exe201be.dto.request.ChangeStatusRequest;
 import exe.exe201be.dto.request.CreateProjectRequest;
 import exe.exe201be.dto.request.SearchRequest;
+import exe.exe201be.dto.response.ProjectLeaderTotalsResponse;
 import exe.exe201be.dto.response.ProjectResponse;
 import exe.exe201be.dto.response.SearchResponse;
 import exe.exe201be.pojo.Project;
@@ -27,4 +28,6 @@ public interface ProjectService {
     SearchResponse<ProjectResponse> searchProjects(SearchRequest request);
 
     List<ProjectResponse> getProjectsByUserId(ObjectId userId, HttpServletResponse httpServletResponse);
+
+    ProjectLeaderTotalsResponse getLeaderTotals(ObjectId userId);
 }

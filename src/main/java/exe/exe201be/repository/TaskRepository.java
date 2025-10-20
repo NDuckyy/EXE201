@@ -5,9 +5,17 @@ import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
 
+import java.time.Instant;
 import java.util.List;
 
 @Repository
 public interface TaskRepository extends MongoRepository<Task, ObjectId> {
     List<Task> findByProjectId(ObjectId projectId);
+
+
+    long countByProjectIdInAndCreatedAtBetween(List<ObjectId> projectIds, Instant thisFrom, Instant thisTo);
+
+    long countByProjectIdIn(List<ObjectId> leaderProjectIds);
+
+    List<Task> findTop5ByProjectIdInOrderByCreatedAtDesc(List<ObjectId> projectIds);
 }

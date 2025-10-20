@@ -3,6 +3,7 @@ package exe.exe201be.service.Task;
 import exe.exe201be.dto.request.ChangeStatusRequest;
 import exe.exe201be.dto.request.CreateTaskRequest;
 import exe.exe201be.dto.response.ProjectResponse;
+import exe.exe201be.dto.response.RecentTaskResponse;
 import exe.exe201be.dto.response.TaskResponse;
 import exe.exe201be.dto.response.UserResponse;
 import exe.exe201be.exception.AppException;
@@ -10,6 +11,7 @@ import exe.exe201be.exception.ErrorCode;
 import exe.exe201be.pojo.*;
 import exe.exe201be.pojo.type.Status;
 import exe.exe201be.repository.ProjectRepository;
+import exe.exe201be.repository.ProjectUserRepository;
 import exe.exe201be.repository.TaskRepository;
 import exe.exe201be.repository.UserRepository;
 import org.bson.types.ObjectId;
@@ -34,6 +36,9 @@ public class TaskServiceImpl implements TaskService {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private ProjectUserRepository projectUserRepository;
 
     @Override
     public List<TaskResponse> getAllTasksByProjectId(ObjectId projectId) {
@@ -94,6 +99,38 @@ public class TaskServiceImpl implements TaskService {
         Project project = projectRepository.findById(t.getProjectId()).orElse(null);
 
         return getTaskResponse(t, user, project);
+    }
+
+    public List<RecentTaskResponse> getRecentTasksForUser(ObjectId userId) {
+        // 1) Lấy các project mà user thuộc (member/leader)
+        List<ProjectUser> pus = projectUserRepository.findByUserId(userId);
+        if (pus.isEmpty()) return List.of();
+
+        List<ObjectId> projectIds = pus.stream()
+                .map(ProjectUser::getProjectId)
+                .distinct()
+                .toList();
+
+        // 2) Lấy 5 task mới nhất trong các project đó
+        List<Task> tasks = taskRepository.findTop5ByProjectIdInOrderByCreatedAtDesc(projectIds);
+        if (tasks.isEmpty()) return List.of();
+
+        // 3) Nạp tên project để map response
+        var projectMap = projectRepository.findAllById(
+                tasks.stream().map(Task::getProjectId).distinct().toList()
+        ).stream().collect(Collectors.toMap(Project::getId, Function.identity()));
+
+        // 4) Map sang DTO gọn
+        return tasks.stream().map(t -> {
+            Project p = projectMap.get(t.getProjectId());
+            return RecentTaskResponse.builder()
+                    .id(t.getId().toHexString())
+                    .title(t.getName())                 // đổi theo field thực tế (name/subject/summary)// nếu schema có, không thì bỏ
+                    .status(t.getStatus() != null ? t.getStatus().name() : null)
+                    .projectId(t.getProjectId().toHexString())
+                    .projectName(p != null ? p.getName() : null)
+                    .build();
+        }).toList();
     }
 
     private TaskResponse getTaskResponse(Task t, User user, Project project) {

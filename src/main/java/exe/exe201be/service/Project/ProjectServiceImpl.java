@@ -4,6 +4,7 @@ import com.nimbusds.jwt.SignedJWT;
 import exe.exe201be.dto.request.ChangeStatusRequest;
 import exe.exe201be.dto.request.CreateProjectRequest;
 import exe.exe201be.dto.request.SearchRequest;
+import exe.exe201be.dto.response.ProjectLeaderTotalsResponse;
 import exe.exe201be.dto.response.ProjectResponse;
 import exe.exe201be.dto.response.SearchResponse;
 import exe.exe201be.dto.response.UserResponse;
@@ -24,10 +25,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.time.*;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
+import java.util.stream.Stream;
 
 @Service
 public class ProjectServiceImpl implements ProjectService {
@@ -54,6 +56,9 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Autowired
     private MailService mailService;
+
+    @Autowired
+    private TaskRepository taskRepository;
 
 
     @Override
@@ -311,4 +316,44 @@ public class ProjectServiceImpl implements ProjectService {
                 .collect(Collectors.toList());
 
     }
+
+    @Override
+    public ProjectLeaderTotalsResponse getLeaderTotals(ObjectId userId) {
+        // Lấy danh sách project mà user là leader
+        List<ObjectId> leaderProjectIds = getLeaderProjectIds(userId);
+        int totalLeaderProjects = leaderProjectIds.size();
+
+        long totalTasks = 0L;
+        if (!leaderProjectIds.isEmpty()) {
+            totalTasks = taskRepository.countByProjectIdIn(leaderProjectIds);
+            // Nếu cần lọc status:
+            // totalTasks = taskRepository.countByProjectIdInAndStatusIn(leaderProjectIds, List.of(Status.OPEN, Status.IN_PROGRESS));
+        }
+
+        return ProjectLeaderTotalsResponse.builder()
+                .totalLeaderProjects(totalLeaderProjects)
+                .totalTasks(totalTasks)
+                .build();
+    }
+
+    /** gom project là leader theo cả 2 nguồn: managerId và ProjectUser role=PROJECT_LEADER */
+    private List<ObjectId> getLeaderProjectIds(ObjectId userId) {
+        // C1: managerId
+        List<ObjectId> byManager = projectRepository.findByManagerId(userId).stream()
+                .map(Project::getId)
+                .toList();
+
+        // C2: ProjectUser role
+        Role leaderRole = roleRepository.findByKey("PROJECT_LEADER");
+        List<ObjectId> byPU = (leaderRole == null)
+                ? List.of()
+                : projectUserRepository.findByUserIdAndRoleId(userId, leaderRole.getId()).stream()
+                .map(ProjectUser::getProjectId)
+                .toList();
+
+        return java.util.stream.Stream.concat(byManager.stream(), byPU.stream())
+                .distinct()
+                .toList();
+    }
+
 }

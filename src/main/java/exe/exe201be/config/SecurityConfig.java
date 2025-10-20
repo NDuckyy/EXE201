@@ -138,7 +138,9 @@ public class SecurityConfig {
                                 "/api/projects/my-projects").access(this::isProjectMemberOrLeader)
 
                         .requestMatchers(HttpMethod.GET,
-                                "/api/orders/user").hasAuthority("USER")
+                                "/api/orders/user",
+                                "/api/projects/user/dashboard",
+                                "/api/dashboard/recent-tasks").hasAuthority("USER")
 
                         .requestMatchers(HttpMethod.GET,
                                 "/api/dashboard/member-data").hasAuthority("USER")

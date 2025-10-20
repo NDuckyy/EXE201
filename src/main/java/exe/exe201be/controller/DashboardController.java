@@ -2,6 +2,7 @@ package exe.exe201be.controller;
 
 import exe.exe201be.dto.response.*;
 import exe.exe201be.service.Dashboard.DashboardService;
+import exe.exe201be.service.Task.TaskService;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -18,6 +19,9 @@ import java.util.List;
 public class DashboardController {
     @Autowired
     private DashboardService dashboardService;
+
+    @Autowired
+    private TaskService taskService;
 
     @GetMapping("/member-data")
     public APIResponse<TotalResponse> getMemberData(@AuthenticationPrincipal Jwt jwt) {
@@ -87,5 +91,18 @@ public class DashboardController {
         res.setMessage("Fetched monthly project trend successfully");
         res.setData(data);
         return res;
+    }
+
+    @GetMapping("/recent-tasks")
+    public APIResponse<List<RecentTaskResponse>> getRecentTasks(@AuthenticationPrincipal Jwt jwt) {
+        String userId = jwt.getSubject();
+        APIResponse<List<RecentTaskResponse>> response = new APIResponse<>();
+        ObjectId id = new ObjectId(userId);
+        List<RecentTaskResponse> recentTasks = taskService.getRecentTasksForUser(id);
+        if (recentTasks != null) {
+            response.setMessage("Recent tasks retrieved successfully");
+            response.setData(recentTasks);
+        }
+        return response;
     }
 }

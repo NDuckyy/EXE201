@@ -5,6 +5,7 @@ import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.Collection;
 import java.util.List;
 
 @Repository
@@ -14,4 +15,6 @@ public interface ProjectUserRepository extends MongoRepository<ProjectUser, Obje
     ProjectUser findByProjectIdAndUserId(ObjectId projectId, ObjectId userId);
 
     List<ProjectUser> findByUserId(ObjectId userId);
+
+    List<ProjectUser> findByUserIdAndRoleId(ObjectId userId, ObjectId id);
 }
