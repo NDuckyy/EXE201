@@ -118,4 +118,13 @@ public class ServiceProviderController {
         return response;
     }
 
+    @GetMapping("/inactive-providers")
+    @Operation(summary = "Get Inactive Service Providers", description = "Retrieve a list of all inactive service providers")
+    public APIResponse<List<ServiceProvider>> getInactiveServiceProviders() {
+        APIResponse<List<ServiceProvider>> response = new APIResponse<>();
+        response.setMessage("Success");
+        response.setData(serviceProviderService.getAllInactiveServiceProviders());
+        return response;
+    }
+
 }

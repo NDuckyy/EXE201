@@ -150,4 +150,9 @@ public class ServiceProviderServiceImpl implements ServiceProviderService {
             serviceProviderRepository.save(serviceProvider);
         }
     }
+
+    @Override
+    public List<ServiceProvider> getAllInactiveServiceProviders() {
+        return serviceProviderRepository.findByStatus(Status.INACTIVE);
+    }
 }

@@ -13,4 +13,6 @@ public interface ServiceProviderService {
     ServiceProviderResponse createServiceProvider(ObjectId userId, CreateServiceProviderRequest request);
     ServiceProviderResponse updateServiceProvider(ObjectId id, CreateServiceProviderRequest serviceProvider);
     void changeStatusServiceProvider(String id);
+
+    List<ServiceProvider>  getAllInactiveServiceProviders();
 }
