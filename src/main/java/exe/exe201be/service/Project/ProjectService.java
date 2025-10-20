@@ -16,7 +16,7 @@ public interface ProjectService {
     List<ProjectResponse> getAllProjects();
     ProjectResponse getProjectById(String id);
     void createProject(CreateProjectRequest project, ObjectId userId, HttpServletResponse httpServletResponse);
-    ProjectResponse updateProject(String id, Project project);
+    void updateProjectInformation(ObjectId id, CreateProjectRequest request);
     void changeStatusProject(String id, ChangeStatusRequest status);
 
     void addMemberToProject(ObjectId projectId, String email);
@@ -32,4 +32,5 @@ public interface ProjectService {
     ProjectLeaderTotalsResponse getLeaderTotals(ObjectId userId);
 
     void deleteProject(ObjectId id);
+
 }

@@ -29,7 +29,7 @@ public enum ErrorCode {
     INVALID_TOKEN(401, "Invalid token"),
     UNAUTHORIZED(401, "Unauthorized"),
 
-    ;
+    INVALID_PROJECT_DATES(400, "Project end date must be after start date"),;
     ErrorCode(int code, String message) {
         this.code = code;
         this.message = message;

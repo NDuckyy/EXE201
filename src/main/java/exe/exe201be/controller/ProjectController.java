@@ -199,4 +199,14 @@ public class ProjectController {
         response.setMessage("Delete project success");
         return response;
     }
+
+    @PutMapping("/{projectId}")
+    @Operation(summary = "Update Project", description = "Update project information by its ID")
+    public APIResponse<?> updateProject(@PathVariable String projectId, @RequestBody CreateProjectRequest updateProject) {
+        ObjectId projectIdObj = new ObjectId(projectId);
+        APIResponse<?> response = new APIResponse<>();
+        projectService.updateProjectInformation(projectIdObj, updateProject);
+        response.setMessage("Update project success");
+        return response;
+    }
 }

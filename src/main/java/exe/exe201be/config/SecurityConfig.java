@@ -131,6 +131,9 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.PUT,
                                 "/api/users/{id}").hasAnyAuthority("USER", "PROVIDER")
 
+                        .requestMatchers(HttpMethod.PUT,
+                                "/api/projects/{projectId}").access(this::isProjectLeader)
+
                         .requestMatchers(HttpMethod.POST,
                                 "/api/{projectId}/tasks",
                                 "/api/projects/{projectId}/members").access(this::isProjectLeader)

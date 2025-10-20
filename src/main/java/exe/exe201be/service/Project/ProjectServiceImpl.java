@@ -174,11 +174,6 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
-    public ProjectResponse updateProject(String id, Project project) {
-        return null;
-    }
-
-    @Override
     public void changeStatusProject(String id, ChangeStatusRequest status) {
         ObjectId objectId = new ObjectId(id);
         Project project = projectRepository.findById(objectId).orElse(null);
@@ -229,7 +224,7 @@ public class ProjectServiceImpl implements ProjectService {
         userProjectRepository.save(userProjectRole);
 
     }
-    
+
     @Override
     public void verifyEmail(String token, String email, String projectId) {
         try {
@@ -295,7 +290,7 @@ public class ProjectServiceImpl implements ProjectService {
             throw new AppException(ErrorCode.USER_NOT_FOUND);
         }
         List<ProjectUser> projectUsers = projectUserRepository.findByUserId(userId);
-        if (projectUsers.isEmpty()){
+        if (projectUsers.isEmpty()) {
             throw new AppException(ErrorCode.PROJECT_NOT_FOUND);
         }
         Set<ObjectId> projectIds = projectUsers.stream()
@@ -348,7 +343,28 @@ public class ProjectServiceImpl implements ProjectService {
         }
     }
 
-    /** gom project là leader theo cả 2 nguồn: managerId và ProjectUser role=PROJECT_LEADER */
+    @Override
+    public void updateProjectInformation(ObjectId projectId, CreateProjectRequest projectRequest) {
+        Project project = projectRepository.findById(projectId).orElse(null);
+        if (project == null) {
+            throw new AppException(ErrorCode.PROJECT_NOT_FOUND);
+        } else {
+            if (projectRequest.getEndDate().before(projectRequest.getStartDate())) {
+                throw new AppException(ErrorCode.INVALID_PROJECT_DATES);
+            }
+            project.setName(projectRequest.getName());
+            project.setDescription(projectRequest.getDescription());
+            project.setStartDate(projectRequest.getStartDate());
+            project.setEndDate(projectRequest.getEndDate());
+            project.setDemoUrl(projectRequest.getDemoUrl());
+            project.setHighlight(projectRequest.getHighlight());
+            project.setScreenshots(projectRequest.getScreenshots());
+            project.setShortIntro(projectRequest.getShortIntro());
+
+            projectRepository.save(project);
+        }
+
+    }
     private List<ObjectId> getLeaderProjectIds(ObjectId userId) {
         // C1: managerId
         List<ObjectId> byManager = projectRepository.findByManagerId(userId).stream()
