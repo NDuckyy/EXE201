@@ -18,4 +18,6 @@ public interface TaskRepository extends MongoRepository<Task, ObjectId> {
     long countByProjectIdIn(List<ObjectId> leaderProjectIds);
 
     List<Task> findTop5ByProjectIdInOrderByCreatedAtDesc(List<ObjectId> projectIds);
+
+    void deleteByProjectId(ObjectId id);
 }

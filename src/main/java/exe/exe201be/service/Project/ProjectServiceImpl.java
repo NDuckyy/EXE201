@@ -342,6 +342,7 @@ public class ProjectServiceImpl implements ProjectService {
         if (project == null) {
             throw new AppException(ErrorCode.PROJECT_NOT_FOUND);
         } else {
+            taskRepository.deleteByProjectId(id);
             projectUserRepository.deleteByProjectId(id);
             projectRepository.delete(project);
         }
