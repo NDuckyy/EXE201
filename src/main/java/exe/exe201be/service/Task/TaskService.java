@@ -17,4 +17,6 @@ public interface TaskService {
     TaskResponse getTaskById(ObjectId taskId);
 
     List<RecentTaskResponse> getRecentTasksForUser(ObjectId userId);
+
+    void deleteTasksById(ObjectId taskId);
 }

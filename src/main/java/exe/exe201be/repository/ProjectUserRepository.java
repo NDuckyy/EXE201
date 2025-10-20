@@ -17,4 +17,6 @@ public interface ProjectUserRepository extends MongoRepository<ProjectUser, Obje
     List<ProjectUser> findByUserId(ObjectId userId);
 
     List<ProjectUser> findByUserIdAndRoleId(ObjectId userId, ObjectId id);
+
+    void deleteByProjectId(ObjectId id);
 }

@@ -85,6 +85,12 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.DELETE,
                                 "/api/service-packages/{id}").hasAuthority("PROVIDER")
 
+                        .requestMatchers(HttpMethod.DELETE,
+                                "/api/projects/{projectId}").access(this::isProjectLeader)
+
+                        .requestMatchers(HttpMethod.DELETE,
+                                "/api/{projectId}/tasks/{taskId}").access(this::isProjectMemberOrLeader)
+
                         .requestMatchers(HttpMethod.GET,
                                 "/api/service-packages",
                                 "/api/service-packages/*",

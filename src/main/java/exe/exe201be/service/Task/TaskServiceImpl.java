@@ -133,6 +133,15 @@ public class TaskServiceImpl implements TaskService {
         }).toList();
     }
 
+    @Override
+    public void deleteTasksById(ObjectId taskId) {
+        Task task = taskRepository.findById(taskId).orElse(null);
+        if (task == null) {
+            throw new AppException(ErrorCode.TASK_NOT_FOUND);
+        }
+        taskRepository.deleteById(taskId);
+    }
+
     private TaskResponse getTaskResponse(Task t, User user, Project project) {
         UserResponse userResponse = user != null ? UserResponse.builder()
                 .id(user.getId().toHexString())

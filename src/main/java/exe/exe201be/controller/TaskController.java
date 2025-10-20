@@ -128,4 +128,14 @@ public class TaskController {
         }
         return response;
     }
+
+    @DeleteMapping("/{taskId}")
+    @Operation(summary = "Delete Task by ID", description = "Delete a specific task by its ID within a project")
+    public APIResponse<?> deleteTaskById(@PathVariable("taskId") String taskId, @PathVariable("projectId") String projectId) {
+        APIResponse<?> response = new APIResponse<>();
+        ObjectId id = new ObjectId(taskId);
+        taskService.deleteTasksById(id);
+        response.setMessage("Task deleted successfully");
+        return response;
+    }
 }

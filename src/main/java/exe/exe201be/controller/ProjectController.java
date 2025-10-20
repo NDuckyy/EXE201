@@ -190,4 +190,13 @@ public class ProjectController {
         res.setData(data);
         return res;
     }
+
+    @DeleteMapping("/{projectId}")
+    public APIResponse<?> deleteProject(@PathVariable String projectId) {
+        ObjectId projectIdObj = new ObjectId(projectId);
+        APIResponse<?> response = new APIResponse<>();
+        projectService.deleteProject(projectIdObj);
+        response.setMessage("Delete project success");
+        return response;
+    }
 }

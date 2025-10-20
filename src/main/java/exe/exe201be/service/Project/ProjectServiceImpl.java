@@ -336,6 +336,17 @@ public class ProjectServiceImpl implements ProjectService {
                 .build();
     }
 
+    @Override
+    public void deleteProject(ObjectId id) {
+        Project project = projectRepository.findById(id).orElse(null);
+        if (project == null) {
+            throw new AppException(ErrorCode.PROJECT_NOT_FOUND);
+        } else {
+            projectUserRepository.deleteByProjectId(id);
+            projectRepository.delete(project);
+        }
+    }
+
     /** gom project là leader theo cả 2 nguồn: managerId và ProjectUser role=PROJECT_LEADER */
     private List<ObjectId> getLeaderProjectIds(ObjectId userId) {
         // C1: managerId

@@ -30,4 +30,6 @@ public interface ProjectService {
     List<ProjectResponse> getProjectsByUserId(ObjectId userId, HttpServletResponse httpServletResponse);
 
     ProjectLeaderTotalsResponse getLeaderTotals(ObjectId userId);
+
+    void deleteProject(ObjectId id);
 }
