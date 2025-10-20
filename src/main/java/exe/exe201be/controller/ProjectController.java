@@ -209,4 +209,14 @@ public class ProjectController {
         response.setMessage("Update project success");
         return response;
     }
+
+    @PatchMapping("/{projectId}/update-progress")
+    @Operation(summary = "Update Project Progress", description = "Update the progress of a project by its ID")
+    public APIResponse<?> updateProgress(@PathVariable String projectId) {
+        ObjectId projectIdObj = new ObjectId(projectId);
+        APIResponse<?> response = new APIResponse<>();
+        projectService.updateProgress(projectIdObj);
+        response.setMessage("Update project progress success");
+        return response;
+    }
 }

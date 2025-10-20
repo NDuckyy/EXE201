@@ -33,4 +33,6 @@ public interface ProjectService {
 
     void deleteProject(ObjectId id);
 
+    void updateProgress(ObjectId projectId);
+
 }

@@ -344,6 +344,26 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
+    public void updateProgress(ObjectId projectId) {
+        Project project = projectRepository.findById(projectId).orElse(null);
+        if (project == null) {
+            throw new AppException(ErrorCode.PROJECT_NOT_FOUND);
+        } else {
+            List<Task> tasks = taskRepository.findByProjectId(projectId);
+            if (tasks.isEmpty()) {
+                project.setProgress(0.0);
+            } else {
+                long completedTasks = tasks.stream()
+                        .filter(t -> t.getStatus() == Status.DONE)
+                        .count();
+                double progress = (double) completedTasks / tasks.size() * 100;
+                project.setProgress(progress);
+            }
+            projectRepository.save(project);
+        }
+    }
+
+    @Override
     public void updateProjectInformation(ObjectId projectId, CreateProjectRequest projectRequest) {
         Project project = projectRepository.findById(projectId).orElse(null);
         if (project == null) {

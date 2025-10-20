@@ -117,6 +117,9 @@ public class SecurityConfig {
                                 "/api/orders/{id}"
                         ).hasAuthority("PROVIDER")
 
+                        .requestMatchers(HttpMethod.PATCH,
+                                "/api/projects/{projectId}/update-progress").permitAll()
+
                         .requestMatchers(HttpMethod.POST,
                                 "/api/service-packages")
                         .hasAuthority("PROVIDER")
