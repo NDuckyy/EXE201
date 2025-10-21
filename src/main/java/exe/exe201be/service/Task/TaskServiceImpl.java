@@ -142,6 +142,20 @@ public class TaskServiceImpl implements TaskService {
         taskRepository.deleteById(taskId);
     }
 
+    @Override
+    public void updateTask(ObjectId taskId, ObjectId projectId, CreateTaskRequest taskRequest) {
+        Task existingTask = taskRepository.findById(taskId).orElse(null);
+        if (existingTask == null) {
+            throw new AppException(ErrorCode.TASK_NOT_FOUND);
+        }
+        existingTask.setName(taskRequest.getName());
+        existingTask.setDescription(taskRequest.getDescription());
+        existingTask.setStatus(taskRequest.getStatus());
+        existingTask.setPriority(taskRequest.getPriority());
+        existingTask.setDueDate(taskRequest.getDueDate());
+        taskRepository.save(existingTask);
+    }
+
     private TaskResponse getTaskResponse(Task t, User user, Project project) {
         UserResponse userResponse = user != null ? UserResponse.builder()
                 .id(user.getId().toHexString())

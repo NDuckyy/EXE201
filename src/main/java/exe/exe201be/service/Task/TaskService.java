@@ -12,11 +12,16 @@ import java.util.List;
 
 public interface TaskService {
     List<TaskResponse> getAllTasksByProjectId(ObjectId projectId);
+
     void changeTaskStatus(ObjectId taskId, ChangeStatusRequest status);
+
     Task createTask(CreateTaskRequest task, ObjectId projectId, ObjectId userId);
+
     TaskResponse getTaskById(ObjectId taskId);
 
     List<RecentTaskResponse> getRecentTasksForUser(ObjectId userId);
 
     void deleteTasksById(ObjectId taskId);
+
+    void updateTask(ObjectId taskId, ObjectId projectId, CreateTaskRequest taskRequest);
 }

@@ -138,4 +138,19 @@ public class TaskController {
         response.setMessage("Task deleted successfully");
         return response;
     }
+
+    @PutMapping("/{taskId}")
+    @Operation(summary = "Update Task by ID", description = "Update a specific task by its ID within a project")
+    public APIResponse<?> updateTaskById(
+            @PathVariable("taskId") String taskId,
+            @PathVariable("projectId") String projectId,
+            @RequestBody CreateTaskRequest taskRequest
+    ) {
+        APIResponse<?> response = new APIResponse<>();
+        ObjectId tId = new ObjectId(taskId);
+        ObjectId pId = new ObjectId(projectId);
+        taskService.updateTask(tId, pId, taskRequest);
+        response.setMessage("Task updated successfully");
+        return response;
+    }
 }
