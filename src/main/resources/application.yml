@@ -6,8 +6,8 @@ spring:
       auto-index-creation: true
   servlet:
     multipart:
-      max-file-size: 10MB
-      max-request-size: 10MB
+      max-file-size: -1          # không giới hạn
+      max-request-size: -1       # không giới hạn
 
 resend:
   api-key: re_ExP57fG1_FJ3MpmjMbRCa5qXhp8te1zp7
@@ -26,7 +26,7 @@ app:
 
 server:
   forward-headers-strategy: native   # Quan trọng: để Spring nhận X-Forwarded-* headers
+  tomcat:
+    max-swallow-size: -1             # không giới hạn swallow size cho file lớn
 
 api-key-webhook-payment: api-key-hello-founderhub-123abc!@@@
-
-
