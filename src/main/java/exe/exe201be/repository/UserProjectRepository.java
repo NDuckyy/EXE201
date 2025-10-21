@@ -10,4 +10,6 @@ import java.util.List;
 @Repository
 public interface UserProjectRepository extends MongoRepository<UserProjectRole, ObjectId> {
     List<UserProjectRole> findByUserId(ObjectId userId);
+
+    void deleteByProjectId(ObjectId id);
 }

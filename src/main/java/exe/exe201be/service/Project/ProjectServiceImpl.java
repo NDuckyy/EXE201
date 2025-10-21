@@ -340,6 +340,7 @@ public class ProjectServiceImpl implements ProjectService {
             taskRepository.deleteByProjectId(id);
             projectUserRepository.deleteByProjectId(id);
             projectRepository.delete(project);
+            userProjectRepository.deleteByProjectId(id);
         }
     }
 
