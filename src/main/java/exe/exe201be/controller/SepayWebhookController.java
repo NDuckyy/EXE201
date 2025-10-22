@@ -3,10 +3,16 @@ package exe.exe201be.controller;
 import exe.exe201be.dto.request.ChangeStatusRequest;
 import exe.exe201be.dto.request.SepayWebhookRequest;
 import exe.exe201be.dto.response.APIResponse;
-import exe.exe201be.pojo.Order;
+import exe.exe201be.pojo.*;
 import exe.exe201be.pojo.type.Status;
+import exe.exe201be.repository.OrderDetailRepository;
+import exe.exe201be.repository.ServicePackageRepository;
+import exe.exe201be.repository.ServiceProviderRepository;
+import exe.exe201be.repository.UserRepository;
+import exe.exe201be.service.Mail.MailService;
 import exe.exe201be.service.Order.OrderService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -19,6 +25,21 @@ import java.util.Objects;
 public class SepayWebhookController {
 
     private final OrderService orderService;
+
+    @Autowired
+    private MailService mailService;
+
+    @Autowired
+    private ServiceProviderRepository serviceProviderRepository;
+
+    @Autowired
+    private OrderDetailRepository orderDetailRepository;
+
+    @Autowired
+    private ServicePackageRepository servicePackageRepository;
+
+    @Autowired
+    private UserRepository userRepository;
 
     @Value("${api-key-webhook-payment}")
     private String sepayWebhookApiKey;
@@ -86,6 +107,27 @@ public class SepayWebhookController {
 
             response.setCode(200);
             response.setMessage("Order " + order.getId() + " updated to PAID");
+            OrderDetail orderDetail = orderDetailRepository.findByOrderId(order.getId());
+            ServicePackage servicePackage = servicePackageRepository.findById(orderDetail.getPackageId()).orElse(null);
+            if (servicePackage == null) {
+                response.setCode(404);
+                response.setMessage("Service Package not found for Order Detail: " + orderDetail.getId());
+                return ResponseEntity.status(404).body(response);
+            }
+            ServiceProvider serviceProvider = serviceProviderRepository.findById(servicePackage.getProviderId()).orElse(null);
+            if (serviceProvider == null) {
+                response.setCode(404);
+                response.setMessage("Service Provider not found for Service Package: " + servicePackage.getId());
+                return ResponseEntity.status(404).body(response);
+            }
+            User user = userRepository.findById(order.getUserId()).orElse(null);
+            if (user == null) {
+                response.setCode(404);
+                response.setMessage("User not found for Service Provider: " + serviceProvider.getId());
+                return ResponseEntity.status(404).body(response);
+            }
+
+            mailService.sendEmail(user.getEmail(), serviceProvider.getContactEmail(), serviceProvider.getPhoneNumber());
             return ResponseEntity.ok(response);
 
         } catch (Exception e) {
