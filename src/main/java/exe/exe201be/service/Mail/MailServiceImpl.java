@@ -21,13 +21,13 @@ public class MailServiceImpl implements MailService {
 
     @Override
     public void sendVerificationEmail(String to, String token, String projectId) {
-        String verifyUrl = "http://localhost:3000/workspace/verify?token=" + token + "&email=" + to + "&projectId=" + projectId;
+        String verifyUrl = "https://founders-hub-fe.vercel.app/workspace/verify?token=" + token + "&email=" + to + "&projectId=" + projectId;
 
         String htmlContent = """
                 <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 600px; margin: auto;
                             border: 1px solid #e0e0e0; border-radius: 10px; overflow: hidden; background-color: #ffffff;">
                     <div style="background-color: #0079bf; padding: 30px 20px; text-align: center; color: white;">
-                        <img src="https://scontent.fsgn5-5.fna.fbcdn.net/v/t39.30808-6/552786229_122095343319043574_6557106202731065632_n.jpg?_nc_cat=100&ccb=1-7&_nc_sid=6ee11a&_nc_ohc=x4eT_UydcssQ7kNvwH2PG7I&_nc_oc=AdmlqPiB_wOITeBV3MV8ypiIT5J_82eI4eo6IDpABRF9ndrMMxSoSXkc7pV6CqwHbnc&_nc_zt=23&_nc_ht=scontent.fsgn5-5.fna&_nc_gid=rgJNsWYFnfuhZHx12_Fd3w&oh=00_AfemVyZCzZdR4BVRtJ3R1Okn3Sb0c35_DSad7X82exhafA&oe=68E959AF"
+                        <img src="https://exe201-s3.s3.ap-southeast-2.amazonaws.com/uploads/ee3c62a4-d67c-4f78-80e8-8ce16173e6e7.jpg"
                              alt="Project Logo"
                              style="width: 90px; height: 90px; margin-bottom: 10px;
                                     border-radius: 50%%; object-fit: cover; border: 3px solid #ffffff;">
@@ -91,7 +91,7 @@ public class MailServiceImpl implements MailService {
             <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 600px; margin: auto;
                         border: 1px solid #e0e0e0; border-radius: 10px; overflow: hidden; background-color: #ffffff;">
                 <div style="background-color: #0079bf; padding: 30px 20px; text-align: center; color: white;">
-                    <img src="https://scontent.fsgn5-5.fna.fbcdn.net/v/t39.30808-6/552786229_122095343319043574_6557106202731065632_n.jpg?_nc_cat=100&ccb=1-7&_nc_sid=6ee11a&_nc_ohc=x4eT_UydcssQ7kNvwH2PG7I&_nc_oc=AdmlqPiB_wOITeBV3MV8ypiIT5J_82eI4eo6IDpABRF9ndrMMxSoSXkc7pV6CqwHbnc&_nc_zt=23&_nc_ht=scontent.fsgn5-5.fna&_nc_gid=rgJNsWYFnfuhZHx12_Fd3w&oh=00_AfemVyZCzZdR4BVRtJ3R1Okn3Sb0c35_DSad7X82exhafA&oe=68E959AF"
+                    <img src="https://exe201-s3.s3.ap-southeast-2.amazonaws.com/uploads/ee3c62a4-d67c-4f78-80e8-8ce16173e6e7.jpg"
                          alt="Project Logo"
                          style="width: 90px; height: 90px; margin-bottom: 10px;
                                 border-radius: 50%%; object-fit: cover; border: 3px solid #ffffff;">
