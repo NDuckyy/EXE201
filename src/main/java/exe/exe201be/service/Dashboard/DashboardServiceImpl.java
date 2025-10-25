@@ -327,6 +327,7 @@ public class DashboardServiceImpl implements DashboardService {
                 .mapToDouble(Double::doubleValue)
                 .average()
                 .orElse(0.0);
+        avgProgress = Math.round(avgProgress * 10.0) / 10.0;
 
         // New projects this month
         YearMonth nowYm = YearMonth.now();
